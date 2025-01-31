@@ -1,0 +1,169 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//
+// The key Moving Averages, displayed depending on the timeframe used.
+//
+// The following (default) values are used:
+//
+// Daily: MA10, EMA21, MA50, MA200
+// Weekly: MA10, MA40
+// Intraday: Daily MA5  (idea curtesy: Brian Shannon) and EMA65
+//
+// The MA200 will be presented in white when On-Balance Volume is positive,
+// else it is presented in blue.
+//
+// It is also possibe to display a Bollinger Band.
+//
+//@version=5
+indicator("Key Moving Averages", shorttitle="KMAs", overlay=true)
+
+src = close
+
+kaki1 = color.new(#fff68f, 0)
+blue2 = color.new(#9999ff, 0)
+gray2 = color.new(color.gray, 85)
+gray3 = color.new(color.gray, 60)
+slategray1 = color.new(#c6e2ff, 0)
+
+// On-Balance Volume MA50
+obv50 = ta.sma(ta.obv, 50)
+
+//
+// What is the Timeframe?
+//
+dayInMinutes = 24 * 60
+isHourly = timeframe.period == "60"
+isDaily = timeframe.period == "D"
+isWeekly = timeframe.period == "W"
+isIntraday = (timeframe.multiplier < dayInMinutes) and (not isDaily) and (not isWeekly)
+
+//
+// Plot the Moving Averages
+//
+plot5 = input(defval=false,  title="Plot MA5",    group="Daily Moving Averages")
+plot10 = input(defval=false, title="Plot MA10",  group="Daily Moving Averages")
+plot20 = input(defval=true,  title="Plot EMA21",  group="Daily Moving Averages")
+plot50 = input(defval=true,  title="Plot MA50",   group="Daily Moving Averages")
+plot200 = input(defval=true, title="Plot MA200", group="Daily Moving Averages")
+
+plotMA5 = plot5 and isDaily
+plotMA10 = plot10 and isDaily
+plotMA20 = plot20 and isDaily
+plotMA50 = plot50 and isDaily
+plotMA200 = plot200 and isDaily
+
+MA5 = ta.sma(src, 5)
+MA10 = ta.sma(src, 10)
+MA20 = ta.ema(src, 21)
+MA50 = ta.sma(src, 50)
+EMA65 = ta.ema(src, 65)
+MA200 = ta.sma(src, 200)
+
+color200 = (ta.obv >= obv50) ? color.white : blue2
+
+// Display the close/ema21 ratio in percent
+show21ratio = input.bool(defval=true, title="Display close/ema21 ratio")
+ema21Ratio = 100 * (close/MA20 -1)
+ema21RatioStr = str.tostring(math.round(ema21Ratio)) + "%"
+
+var float track21 = na
+var label trackLabels = na
+// Display the percentage that close is above MA20; only on the last bar.
+if barstate.islast and show21ratio and (close > MA20)
+    lbl = label.new(na, na, "", style=label.style_none, size=size.small, textcolor=color.yellow, color=color.black, yloc=yloc.price)
+    trackLabels := lbl
+    track21 := high
+    // Update the label's position, text and tooltip.
+    //label.set_xy(lbl, bar_index[highestBarOffset], hi)
+    label.set_xy(lbl, bar_index, high * 1.03)
+    label.set_text(lbl, ema21RatioStr)
+else
+    trackLabels := na
+    track21 := na
+
+if barstate.islast and (trackLabels[1] != na)
+    label.delete(trackLabels[1])
+
+
+//
+// Display a Bollinger Band
+//
+plotBB = input(defval=false, title="Plot Bollinger Band")
+[_middle, upper, lower] = ta.bb(close, 20, 2)
+
+upperPlot = plot(plotBB and isDaily ? upper : na, color=gray3)
+lowerPlot = plot(plotBB and isDaily ? lower : na, color=gray3)
+fill(upperPlot, lowerPlot, color=gray2)
+
+
+//
+// Calculate DMA5 for intraday timeframes.
+//
+openHours = input(defval=6.5, title="Open: Hours a Day")
+plotD5 = input(defval=true, title="Plot DMA5", group="Intraday Moving Averages")
+dayMinutes = math.round(openHours * 60)
+intraDayLength = 5
+dminutes = intraDayLength * dayMinutes
+dlen = dminutes / timeframe.multiplier
+DMA5 = ta.sma(close, dlen)
+plotDMA5 = isIntraday and plotD5 ? true : false
+
+// Maybe plot EMA65 on Hourly?
+plot65 = input(defval=true, title="Plot EMA65", group="Intraday Moving Averages")
+plotEMA65 = plot65 and isIntraday
+
+//
+// Calculate MA10 and MA40 for the Weekly timeframe.
+//
+plotW10 = input(defval=true, title="Plot MA10", group="Weekly Moving Averages")
+plotW40 = input(defval=true, title="Plot MA40", group="Weekly Moving Averages")
+weekly = request.security(syminfo.tickerid, 'W', close)
+WMA10 = ta.sma(weekly, 10)
+WMA40 = ta.sma(weekly, 40)
+plotWMA10 = isWeekly and plotW10 ? true : false
+plotWMA40 = isWeekly and plotW40 ? true : false
+
+//
+// Plot the Moving Averages
+//
+plot(series=plotDMA5 ? DMA5 : na,   linewidth=1, color=color.green,  title="DMA5",   style=plot.style_line)
+plot(series=plotMA5 ? MA5 : na,     linewidth=1, color=slategray1,   title="MA5",    style=plot.style_line)
+plot(series=plotMA10 ? MA10 : na,   linewidth=1, color=color.blue,   title="MA10",   style=plot.style_line)
+plot(series=plotMA20 ? MA20 : na,   linewidth=1, color=color.yellow, title="MA20",   style=plot.style_line)
+plot(series=plotMA50 ? MA50 : na,   linewidth=1, color=color.green,  title="MA50",   style=plot.style_cross)
+plot(series=plotMA200 ? MA200 : na, linewidth=1, color=color200,     title="MA200",  style=plot.style_circles)
+plot(series=plotEMA65 ? EMA65 : na, linewidth=1, color=color.purple, title="EMA65",  style=plot.style_circles)
+plot(series=plotWMA10 ? WMA10 : na, linewidth=1, color=color.teal,   title="WMA10",  style=plot.style_line)
+plot(series=plotWMA40 ? WMA40 : na, linewidth=1, color=color.fuchsia,title="WMA40",  style=plot.style_circles)
+
+
+float inside = 0.0
+if (high <= high[1]) and (low >= low[1])
+    inside := 1
+else if inside[1] == 1
+    int i = 2
+    while true
+        if inside[i] == 1
+            i := i + 1
+            continue
+        else if (high <= high[i]) and (low >= low[i])
+            inside := 1
+            break
+        else
+            inside := 0
+            break
+else
+    inside := 0
+
+vh = ta.valuewhen(inside[1] == 0 and inside == 1, high[1], 0)
+vl = ta.valuewhen(inside[1] == 0 and inside == 1, low[1],  0)
+
+color_line = input.color(defval=color.yellow, title="Inside Bars Color")
+transp = input.int(defval=90, title="Color transparency", minval=0, maxval=100)
+line_width = input.int(defval=1, title="Line width", minval=1, maxval=4)
+color_fill = color.new(color_line, transp)
+
+ph = plot(inside == 1 ? vh : na, title="Inside Bars High", style=plot.style_linebr, linewidth=line_width, color=color_line)
+pl = plot(inside == 1 ? vl : na, title="Inside Bars Low", style=plot.style_linebr, linewidth=line_width, color=color_line)
+fill(ph, pl, color=color_fill)
+
