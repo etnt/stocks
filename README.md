@@ -33,5 +33,5 @@ and here I'll go through my own personal favorites.
 
 Let's start by having a look at my typical setup, and then explain the various indicators I'm using:
 
-<img src="images/tradingview_setup.png" width=600/>
+<img src="images/tradingview_setup.png" width=800/>
 
