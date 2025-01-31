@@ -9,8 +9,8 @@ The AppScript used can be found [here](AppScript/balanced_portfolio.gs)
 
 ## Record a portfolio value once a day
 
-Here we will record a portfolio value at by record and append the
-value to another Google Sheet table, once a day, together with the date.
+Here we will record a portfolio value by appendng the value to a table,
+located in another Sheet, once a day, together with the date.
 
 We setup a trigger to run the AppScript once a day.
 
