@@ -35,3 +35,47 @@ Let's start by having a look at my typical setup, and then explain the various i
 
 <img src="images/tradingview_setup.png" width=800/>
 
+This setup consist of a main area where the actual stock chart is shown and a smaller area at the bottom
+that show the traded volume.
+
+The main area is using three "indicators"/PineScripts:
+
+    * `KMAs` - A number of plotted _moving averages curves_, the _inside bars_ indicator and more...
+    * `Position Sizes` - Shows a table of suggested position sizes based on the account size and choosen risk percentage.
+    * `Quick Stats` - Show some info up in the right corner such as: `Minervini's Trend Template` and the `Average Daily Range in percent`   
+
+The bottom area shows the traded volume, where a number of volume related indicators are baked in.
+The indicator is named: `Nice Volume` and contains:
+
+    * The colors of the bars have a meaning, e.g when a `Pocket Pivot` has occured.
+    * The plotted moving average color is changed depending on the trend of the Acc/Dist volume indicator.
+    * A small table shows more volume related figures.
+
+### KMAs - Key Moving Averages
+
+This is a script that combines many indicators, which each, easily can be turned on/off via the TradingView config menu.
+
+The script can be found (here)[PineScript/kmas.pine].
+
+A number of Moving Averages are displayed (depending on the timeframe used).
+The following (default) values are used:
+
+    * `Daily` : MA10, EMA21, MA50, MA200
+    * `Weekly`: MA10, MA40
+    * `Intraday`: Daily MA5 and EMA65
+
+The MA200 will be presented in white when `On-Balance Volume` is positive, else it is presented in blue.
+
+It is also possible to display a `Bollinger Band` and to display the `close/ema21 ratio in percent`.
+
+### Position Sizes
+
+TBD
+
+### Quick Stats
+
+TBD
+
+### Nice Volume - The bottom (volume) area
+
+TBD
