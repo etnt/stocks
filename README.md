@@ -22,6 +22,10 @@ Have a look at this [video](https://youtu.be/lW_x_L9ncuI?si=vB41r96hh3aVIKw0)
 
 The AppScript used can be found [here](AppScript/record_portfolio_value.gs)
 
+### A Mobile App for displaying portfolio progress diagrams
+
+TBD 
+
 ## TradingView
 
 [TradingView](https://www.tradingview.com/about/) is a nice charting platform
