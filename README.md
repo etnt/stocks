@@ -44,16 +44,16 @@ that show the traded volume.
 
 The main area is using three "indicators"/PineScripts:
 
-    * `KMAs` - A number of plotted _moving averages curves_, the _inside bars_ indicator and more...
-    * `Position Sizes` - Shows a table of suggested position sizes based on the account size and choosen risk percentage.
-    * `Quick Stats` - Show some info up in the right corner such as: `Minervini's Trend Template` and the `Average Daily Range in percent`   
+* `KMAs` - A number of plotted _moving averages curves_, the _inside bars_ indicator and more...
+* `Position Sizes` - Shows a table of suggested position sizes based on the account size and choosen risk percentage.
+* `Quick Stats` - Show some info up in the right corner such as: `Minervini's Trend Template` and the `Average Daily Range in percent`   
 
 The bottom area shows the traded volume, where a number of volume related indicators are baked in.
 The indicator is named: `Nice Volume` and contains:
 
-    * The colors of the bars have a meaning, e.g when a `Pocket Pivot` has occured.
-    * The plotted moving average color is changed depending on the trend of the Acc/Dist volume indicator.
-    * A small table shows more volume related figures.
+* The colors of the bars have a meaning, e.g when a `Pocket Pivot` has occured.
+* The plotted moving average color is changed depending on the trend of the Acc/Dist volume indicator.
+* A small table shows more volume related figures.
 
 ### KMAs - Key Moving Averages
 
