@@ -59,7 +59,7 @@ The indicator is named: `Nice Volume` and contains:
 
 This is a script that combines many indicators, which each, easily can be turned on/off via the TradingView config menu.
 
-The script can be found (here)[PineScript/kmas.pine].
+The script can be found [here](PineScript/kmas.pine).
 
 A number of Moving Averages are displayed (depending on the timeframe used).
 The following (default) values are used:
