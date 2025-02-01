@@ -70,6 +70,10 @@ The following (default) values are used:
 
 The MA200 will be presented in white when `On-Balance Volume` is positive, else it is presented in blue.
 
+The `Inside Bars` indicator will draw a shadowed area when succeding `candles` are contained within
+an earlier (larger) candle, thus indicating an area of uncertainty, from where potential breakouts
+could occur. 
+
 It is also possible to display a `Bollinger Band` and to display the `close/ema21 ratio in percent`.
 
 ### Position Sizes
