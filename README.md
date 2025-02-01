@@ -24,7 +24,9 @@ The AppScript used can be found [here](AppScript/record_portfolio_value.gs)
 
 ### A Mobile App for displaying portfolio progress diagrams
 
-TBD 
+Have a look at this [video](https://youtu.be/xnGumHzS5TA?si=-cNkXFTiTh0D_2J6)
+where we build a simple app that you can download to your Mobile to track
+the progress of your Stock Portfolio.
 
 ## TradingView
 
