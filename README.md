@@ -64,9 +64,9 @@ The script can be found (here)[PineScript/kmas.pine].
 A number of Moving Averages are displayed (depending on the timeframe used).
 The following (default) values are used:
 
-    * `Daily` : MA10, EMA21, MA50, MA200
-    * `Weekly`: MA10, MA40
-    * `Intraday`: Daily MA5 and EMA65
+* `Daily` : MA10, EMA21, MA50, MA200
+* `Weekly`: MA10, MA40
+* `Intraday`: Daily MA5 and EMA65
 
 The MA200 will be presented in white when `On-Balance Volume` is positive, else it is presented in blue.
 
