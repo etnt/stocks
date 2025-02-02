@@ -1,0 +1,364 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//
+// When trading, position sizing and risk calculation is the key to become successful.
+// 
+// We need to keep the losses small and adjust the position size according to what
+// risk we are prepared to take for the planned Entry.
+//
+// Based on the Account Size and the max percentage we want to risk for any trade,
+// we calculate, for a number of fixed max Loss percentages:
+//
+//  - The Position size, both in percent and in the selected currency.
+//  - Number of shares to buy.
+//  - Where to put the Stop Loss.
+//  - Where a 1RTP (1 Risk amount Take Profit) level could be put .
+//
+// We also calculate the numbers based on the ATR times a multiple.
+//
+// The values are presented in a table format and will hopefully aid in selecting
+// a suitable Stop Loss (based on the chart sutuation) and hence the proper Position Size.
+//
+// We also allow for expressing the Account size in currencies other than USD.
+// Example:
+//
+//   Account Size in USD and trading US stocks: select USD
+//   Account Size in SEK but trading US stocks: select USDSEK
+//
+//
+//@version=5
+indicator('Position Sizes', overlay=true)
+
+kaki1 = color.new(#fff68f, 0)
+
+text_sz = size.small
+
+src = close
+
+// Change in percent
+cpt(_x, _x1) =>
+    _cpt = (_x / _x1 - 1) * 100
+    _cpt
+
+// Which account to display.
+whatAccount = input.string(title='Display Account', defval='Account 1', options=['Account 1', 'Account 2'])
+useAccount = whatAccount == 'Account 1' ? 1 : 2
+
+//
+// Account 1
+//
+accSize = input.int(20000, title='Account 1 Size', group='Account 1')
+accountRiskPercent_in = input.float(0.5, title='Account 1 Risk Size (%)', group='Account 1')
+accountRiskPercent = accountRiskPercent_in / 100
+
+convert = input.string(title='Convert to USD', defval='USD', group='Account 1', options=['EURSEK', 'USDSEK', 'USDEUR', 'USDCAD', 'USDAUD', 'USDGBP', 'USDJPY', 'USD', 'SEK', 'EUR', 'CAD', 'AUD', 'GBP', 'JPY'])
+// Can't have security in an 'if'...sigh...
+cur = request.security(convert, timeframe.period, close)
+USDcur = float(cur)
+// Convert or do not convert...?
+if convert == 'USD' or convert == 'SEK' or convert == 'EUR' or convert == 'CAD' or convert == 'AUD' or convert == 'GBP' or convert == 'JPY'
+    USDcur := 1.0
+    USDcur
+
+
+//
+// Account 2
+//
+accSize2 = input.int(20000, title='Account 2 Size', group='Account 2')
+accountRiskPercent_in2 = input.float(0.5, title='Account 2 Risk Size (%)', group='Account 2')
+accountRiskPercent2 = accountRiskPercent_in2 / 100
+
+convert2 = input.string(title='Convert to USD', defval='USD', group='Account 2', options=['EURSEK', 'USDSEK', 'USDEUR', 'USDCAD', 'USDAUD', 'USDGBP', 'USDJPY', 'USD', 'SEK', 'EUR', 'CAD', 'AUD', 'GBP', 'JPY'])
+// Can't have security in an 'if'...sigh...
+cur2 = request.security(convert2, timeframe.period, close)
+USDcur2 = float(cur2)
+// Convert or do not convert...?
+if convert2 == 'USD' or convert2 == 'SEK' or convert2 == 'EUR' or convert2 == 'CAD' or convert2 == 'AUD' or convert2 == 'GBP' or convert2 == 'JPY'
+    USDcur2 := 1.0
+    USDcur2
+
+
+//
+// Input four Loss percentage levels.
+//
+slPercent1_in = input.float(2, title='1.Loss percent', group='Risk levels in percent')
+slPercent1 = slPercent1_in / 100
+slPercent1str = str.tostring(slPercent1_in)
+
+slPercent2_in = input.float(3, title='2.Loss percent', group='Risk levels in percent')
+slPercent2 = slPercent2_in / 100
+slPercent2str = str.tostring(slPercent2_in)
+
+slPercent3_in = input.float(4, title='3.Loss percent', group='Risk levels in percent')
+slPercent3 = slPercent3_in / 100
+slPercent3str = str.tostring(slPercent3_in)
+
+slPercent4_in = input.float(5, title='4.Loss percent', group='Risk levels in percent')
+slPercent4 = slPercent4_in / 100
+slPercent4str = str.tostring(slPercent4_in)
+
+
+// Calculate the Stop-Loss
+sl1 = close * (1 - slPercent1)
+sl1str = str.tostring(math.round(sl1, 2))
+
+sl2 = close * (1 - slPercent2)
+sl2str = str.tostring(math.round(sl2, 2))
+
+sl3 = close * (1 - slPercent3)
+sl3str = str.tostring(math.round(sl3, 2))
+
+sl4 = close * (1 - slPercent4)
+sl4str = str.tostring(math.round(sl4, 2))
+
+
+// Calculate the 1R Take Profit
+tp1 = close * (1 + slPercent1)
+tp1str = str.tostring(math.round(tp1, 2))
+
+tp2 = close * (1 + slPercent2)
+tp2str = str.tostring(math.round(tp2, 2))
+
+tp3 = close * (1 + slPercent3)
+tp3str = str.tostring(math.round(tp3, 2))
+
+tp4 = close * (1 + slPercent4)
+tp4str = str.tostring(math.round(tp4, 2))
+
+
+//
+// Account 1
+//
+
+// Calculate the Position Percentage
+posPercent1 = accountRiskPercent / slPercent1
+posPercent1str = str.tostring(math.round(posPercent1 * 100, 2))
+
+posPercent2 = accountRiskPercent / slPercent2
+posPercent2str = str.tostring(math.round(posPercent2 * 100, 2))
+
+posPercent3 = accountRiskPercent / slPercent3
+posPercent3str = str.tostring(math.round(posPercent3 * 100, 2))
+
+posPercent4 = accountRiskPercent / slPercent4
+posPercent4str = str.tostring(math.round(posPercent4 * 100, 2))
+
+
+// Calculate the Position Size
+posSize1 = accSize * posPercent1 / USDcur
+posSize1str = str.tostring(math.round(posSize1))
+
+posSize2 = accSize * posPercent2 / USDcur
+posSize2str = str.tostring(math.round(posSize2))
+
+posSize3 = accSize * posPercent3 / USDcur
+posSize3str = str.tostring(math.round(posSize3))
+
+posSize4 = accSize * posPercent4 / USDcur
+posSize4str = str.tostring(math.round(posSize4))
+
+
+// Calculate the number of shares
+noShares1 = math.floor(posSize1 / close)
+noShares1str = str.tostring(noShares1)
+
+noShares2 = math.floor(posSize2 / close)
+noShares2str = str.tostring(noShares2)
+
+noShares3 = math.floor(posSize3 / close)
+noShares3str = str.tostring(noShares3)
+
+noShares4 = math.floor(posSize4 / close)
+noShares4str = str.tostring(noShares4)
+
+//
+// Account 2
+//
+
+// Calculate the Position Percentage
+posPercent1_2 = accountRiskPercent2 / slPercent1
+posPercent1str_2 = str.tostring(math.round(posPercent1_2 * 100, 2))
+
+posPercent2_2 = accountRiskPercent2 / slPercent2
+posPercent2str_2 = str.tostring(math.round(posPercent2_2 * 100, 2))
+
+posPercent3_2 = accountRiskPercent2 / slPercent3
+posPercent3str_2 = str.tostring(math.round(posPercent3_2 * 100, 2))
+
+posPercent4_2 = accountRiskPercent2 / slPercent4
+posPercent4str_2 = str.tostring(math.round(posPercent4_2 * 100, 2))
+
+
+// Calculate the Position Size
+posSize1_2 = accSize2 * posPercent1_2 / USDcur2
+posSize1str_2 = str.tostring(math.round(posSize1_2))
+
+posSize2_2 = accSize2 * posPercent2_2 / USDcur2
+posSize2str_2 = str.tostring(math.round(posSize2_2))
+
+posSize3_2 = accSize2 * posPercent3_2 / USDcur2
+posSize3str_2 = str.tostring(math.round(posSize3_2))
+
+posSize4_2 = accSize2 * posPercent4_2 / USDcur2
+posSize4str_2 = str.tostring(math.round(posSize4_2))
+
+
+// Calculate the number of shares
+noShares1_2 = math.floor(posSize1_2 / close)
+noShares1str_2 = str.tostring(noShares1_2)
+
+noShares2_2 = math.floor(posSize2_2 / close)
+noShares2str_2 = str.tostring(noShares2_2)
+
+noShares3_2 = math.floor(posSize3_2 / close)
+noShares3str_2 = str.tostring(noShares3_2)
+
+noShares4_2 = math.floor(posSize4_2 / close)
+noShares4str_2 = str.tostring(noShares4_2)
+
+
+
+// Calculate ATR base Stop Loss.
+ATRLen = input.int(defval=14, title='ATR Length', group='ATR based Risk level')
+ATRMul = input.float(defval=1, title='ATR multiple', group='ATR based Risk level')
+// Use ATR x Multiple to calculate the Stop Loss
+ATR = ta.atr(ATRLen)
+ATRpercent = 1 - (close - ATR * ATRMul) / close
+
+ATRpercentStr = str.tostring(math.round(ATRpercent * 100, 2))
+ATRslStr = str.tostring(math.round(close - ATR * ATRMul, 2))
+ATRtpStr = str.tostring(math.round(close + ATR * ATRMul, 2))
+
+//
+// Account 1
+//
+ATRposPercent = accountRiskPercent / ATRpercent
+ATRposPercentStr = str.tostring(math.round(ATRposPercent * 100, 2))
+
+ATRposSize = accSize * ATRposPercent / USDcur
+ATRposSizeStr = str.tostring(math.round(ATRposSize))
+
+ATRnoShares = math.floor(ATRposSize / close)
+ATRnoSharesStr = str.tostring(ATRnoShares)
+
+//
+// Account 2
+//
+ATRposPercent_2 = accountRiskPercent2 / ATRpercent
+ATRposPercentStr_2 = str.tostring(math.round(ATRposPercent_2 * 100, 2))
+
+ATRposSize_2 = accSize2 * ATRposPercent_2 / USDcur2
+ATRposSizeStr_2 = str.tostring(math.round(ATRposSize_2))
+
+ATRnoShares_2 = math.floor(ATRposSize_2 / close)
+ATRnoSharesStr_2 = str.tostring(ATRnoShares_2)
+
+
+//
+// Construct the Table
+//
+tabLoc = input.string(title='Table Location', defval='Lower Right', group='Table Layout', options=['Upper Right', 'Middle Right', 'Lower Right'])
+tabPos = tabLoc == 'Upper Right' ? position.top_right : tabLoc == 'Middle Right' ? position.middle_right : position.bottom_right
+
+// User selectable colors.
+text_col = input.color(title='Header Color', defval=color.yellow, group='Table Layout')
+value_col = input.color(title='Value Color', defval=color.white, group='Table Layout')
+atr_col = input.color(title='ATR Color', defval=kaki1, group='Table Layout')
+
+table t = table.new(tabPos, 6, 6, frame_color=color.gray, frame_width=1, border_color=color.gray, border_width=1)
+
+var SLP_TIP = "Stop Loss percentage."
+var STP_TIP = "Where to put the Stop Loss according to the SL-percentage."
+var RTP_TIP = "Where to Take Profit according to 1 Risk Unit (i.e the Stop Loss percentage)."
+var POS_TIP = "Positions size in percent of Account size."
+var PSZ_TIP = "Position size in money."
+var NUM_TIP = "Number of shares to buy covered by the Position Size."
+
+if barstate.islast and useAccount == 1 and timeframe.period != 'M'
+    table.cell(t, 0, 0, 'SL%',   tooltip=SLP_TIP, text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 0, 'Stop',  tooltip=STP_TIP, text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 2, 0, '1RTP',  tooltip=RTP_TIP, text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 0, 'Pos%',  tooltip=POS_TIP, text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 4, 0, 'PosSz', tooltip=PSZ_TIP, text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 5, 0, '#',     tooltip=NUM_TIP, text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    //
+    table.cell(t, 0, 1, slPercent1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 1, sl1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 1, tp1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 1, posPercent1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 1, posSize1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 1, noShares1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 2, slPercent2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 2, sl2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 2, tp2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 2, posPercent2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 2, posSize2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 2, noShares2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 3, slPercent3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 3, sl3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 3, tp3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 3, posPercent3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 3, posSize3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 3, noShares3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 4, slPercent4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 4, sl4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 4, tp4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 4, posPercent4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 4, posSize4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 4, noShares4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 5, ATRpercentStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 1, 5, ATRslStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 2, 5, ATRtpStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 3, 5, ATRposPercentStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 4, 5, ATRposSizeStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 5, 5, ATRnoSharesStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+
+if barstate.islast and useAccount == 2 and timeframe.period != 'M'
+    table.cell(t, 0, 0, 'SL%', text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 0, 'Stop', text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 2, 0, '1RTP', text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 0, 'Pos%', text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 4, 0, 'PosSz', text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 5, 0, '#', text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    //
+    table.cell(t, 0, 1, slPercent1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 1, sl1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 1, tp1str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 1, posPercent1str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 1, posSize1str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 1, noShares1str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 2, slPercent2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 2, sl2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 2, tp2str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 2, posPercent2str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 2, posSize2str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 2, noShares2str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 3, slPercent3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 3, sl3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 3, tp3str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 3, posPercent3str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 3, posSize3str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 3, noShares3str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 4, slPercent4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 1, 4, sl4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 4, tp4str, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 3, 4, posPercent4str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 4, 4, posSize4str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 5, 4, noShares4str_2, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    //
+    table.cell(t, 0, 5, ATRpercentStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 1, 5, ATRslStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 2, 5, ATRtpStr, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 3, 5, ATRposPercentStr_2, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 4, 5, ATRposSizeStr_2, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+    table.cell(t, 5, 5, ATRnoSharesStr_2, text_halign=text.align_left, text_size=text_sz, text_color=atr_col)
+
+
+

@@ -102,12 +102,77 @@ It is also possible to display a `Bollinger Band` and to display the `close/ema2
 
 ### Position Sizes
 
-TBD
+The script can be found [here](PineScript/position-sizes.pine).
+
+When trading, position sizing and risk calculation is the key to become successful.
+ 
+We need to keep the losses small and adjust the position size according to what
+risk we are prepared to take for the planned Entry.
+
+Based on the Account Size and the max percentage we want to risk for any trade,
+we calculate, for a number of fixed max Loss percentages:
+
+* The Position size, both in percent and in the selected currency.
+* Number of shares to buy.
+* Where to put the Stop Loss.
+* Where a 1RTP (1 Risk amount Take Profit) level could be put .
+
+We also calculate the numbers based on the ATR times a multiple.
+
+The values are presented in a table format and will hopefully aid in selecting
+a suitable Stop Loss (based on the chart situation) and hence the proper Position Size.
+
+We also allow for expressing the Account size in currencies other than USD.
+
+* Account Size in USD and trading US stocks: select USD
+* Account Size in SEK but trading US stocks: select USDSEK
 
 ### Quick Stats
 
-TBD
+The script can be found [here](PineScript/quick-stats.pine).
+
+Quick Stats - shows some important info at the top right corner
+
+* We display the percentage change of two selected Indices.
+
+* *ADR%* - Average Daily Range in percent
+(To quote @qullamaggie: " High ADR is Gold, low ADR is shit...")
+
+* *Trend Template* - indicate if the stock is in a good Up Trend
+We calculates the Trend Template as described by Mark Minervini in his book: "Trade like a stock market wizard"
+For a stock to be considered all the rules has to be fullfilled.
+The only rule this indicator doesn't implement is the IBD Relative Strength ranking.
+Rules:
+  - close > MA-50 > MA-150 > MA-200 , each condition that is true gets one point.
+  - The current stock price is at least 30 percent above its 52-week low, gets one point
+  - The current stock price is within at least 25 percent of its 52-week high, gets one point.
+  - The 200-day moving average line is trending up for at least 1 month (preferably 4–5 months), gets one point.
+  - When we get 6 points, all the rules are fullfilled and we display an OK; else we show the number of points (X).
+
 
 ### Nice Volume - The bottom (volume) area
 
-TBD
+The script can be found [here](PineScript/nice-volume.pine).
+
+This Volume panel is inspired by _TradingLions_ ditto.
+
+Four different colors are used for the Volume columns:
+
+* Up/Down down columns.
+* Pocket Pivot columns.
+* Lowest of 10 periods.
+
+A moving average is plotted where the color is changed
+depending on the trend of the Acc/Dist volume indicator.
+
+A table is displayed containing some Volume indicators:
+
+*Up/Down volume ratio:* where a value above 1.5 is shown
+in green, indicating that more than 50% och the volume
+is positive; where a value below 0.5 is shown in red.
+
+*On-Balance Volume trend:* the percentage OBV is above/below
+a moving average is displayed; positive/negative in green/red.
+
+*The trend*  (Positive/Negative/Weak) of the *Acc/Dist indicator*
+is displayed in either green/red.

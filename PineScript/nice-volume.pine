@@ -1,0 +1,204 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//
+// This Volume panel is inspired by TradingLions ditto.
+//
+// Four different colors are used for the Volume columns:
+// - Up/Down down columns.
+// - Pocket Pivot columns.
+// - Lowest of 10 periods.
+//
+// A moving average is plotted where the color is changed
+// depending on the trend of the Acc/Dist volume indicator.
+//
+// A table is displayed containing some Volume indicators:
+//
+// - Up/Down volume ratio, where a value above 1.5 is shown
+//   in green, indicating that more than 50% och the volume
+//   is positive; where a value below 0.5 is shown in red.
+//
+// - On-Balance Volume trend; the percentage OBV is above/below
+//   a moving average is displayed; positive/negative in green/red.
+//
+// - The trend (Positive/Negative/Weak) of the Acc/Dist indicator
+//   is displayed in either green/red.
+//
+//@version=5
+indicator("Nice Volume", overlay=false, format=format.volume, precision=0)
+
+// https://www.color-hex.com/color-palette/189
+lightblue = color.new(#77aaff, 0)
+darkblue = color.new(#3366ff, 0)
+
+// https://www.color-hex.com/color-names.html
+bitterlemon = color.new(#cae00d, 0)
+citrine = color.new(#e4d00a, 0)
+chromeyellow = color.new(#ffa700, 0)
+mango = color.new(#fdbe02, 0)
+neoncarrot = color.new(#ffa343, 0)
+orangepeel = color.new(#ff9f00, 0)
+goldenpoppy = color.new(#fcc200, 0)
+gold2 = color.new(#eec900, 0)
+
+// Use Green/Red that works for a color blind!
+green1 = color.new(#00ff00, 0)
+green2 = color.new(#00ee00, 0)
+green3 = color.new(#00cd00, 0)
+
+orangered1 = color.new(#ff4500, 0)
+orangered2 = color.new(#ee4000, 0)
+orangered3 = color.new(#cd3700, 0)
+
+volLen1 = input(defval=20, title="MA length", group="Volume Lookback")
+ppLen = input(defval=10, title="Pocket Pivot length", group="Volume Lookback")
+
+closeDown = close < close[1]
+ppVol = volume >= ta.highest(volume[1], ppLen)
+lowVol = volume < ta.lowest(volume[1], ppLen)
+
+//
+// Pocket Pivot Calculation
+//
+greenDay = close > open
+
+float pp = 0.0
+if close < open
+    pp := volume
+else
+    pp := 0.0
+is_pp = volume > ta.highest(pp[1], ppLen)
+
+// Column Color
+vcolor = is_pp and greenDay ? color.lime : (lowVol ? gold2 : (closeDown ? darkblue : lightblue))
+
+
+//
+// Display the percentage the Volume is above its Moving Average.
+//
+maVol1 = ta.sma(volume, volLen1)
+volAvgPercent = 100*(volume/maVol1 - 1)
+isHighVol = volAvgPercent >= 50
+volText = "+" + str.tostring(math.round(volAvgPercent))
+
+var float trackVolAvg = na
+var label trackLabels = na
+// When a new high is found, move the label there and update its text and tooltip.
+if isHighVol
+    lbl = label.new(na, na, "", style=label.style_none, size=size.small, textcolor=color.lime, color=color.black, yloc=yloc.price)
+    trackLabels := lbl
+    trackVolAvg := volAvgPercent
+    // Update the label's position, text and tooltip.
+    //label.set_xy(lbl, bar_index[highestBarOffset], hi)
+    label.set_xy(lbl, bar_index, volume * 1.02)
+    label.set_text(lbl, volText)
+else
+    trackLabels := na
+    trackVolAvg := na
+
+// Clean up so that only the highest label is shown
+// if there exist consecutive labels.
+isConsecutiveLabels = trackLabels != na and trackLabels[1] != na
+
+if isConsecutiveLabels and trackVolAvg > trackVolAvg[1]
+    label.delete(trackLabels[1])
+
+if isConsecutiveLabels and trackVolAvg <= trackVolAvg[1]
+    label.delete(trackLabels)
+
+
+//
+// Calculate shifts in On-Balance Volume.
+//
+// The theory behind OBV is based on the distinction between smart money,
+// namely: institutional investors and less sophisticated retail investors.
+// As mutual funds and pension funds begin to buy into an issue that retail
+// investors are selling, volume may increase even as the price remains 
+// relatively level. Eventually, volume drives the price upward. 
+// At that point, larger investors begin to sell, and smaller investors begin buying. 
+//
+obvLen = input.int(defval=50, title="On-Balance MA length", group="Table Info")
+obvLookbackLen = input.int(defval=5, title="On-Balance Lookback length", group="Table Info")
+dailyOBV = ta.obv[1] 
+obvMA = ta.ema(dailyOBV, obvLen)
+obvLookback = ta.ema(dailyOBV, obvLookbackLen)
+obvPercentage = 100 * ((dailyOBV / obvMA) - 1)
+obvColor = dailyOBV > obvLookback ? green1 : orangered1
+obvStr = str.tostring(math.round(obvPercentage,1)) + "%"
+
+obvPcnt = dailyOBV / obvMA
+proxyOBV = ta.sma(volume,200) * obvPcnt * 1.5
+//proxyOBV = ta.obv - ta.sma(ta.obv, 66)
+
+//
+// Calculate shifts in Accumulation/Distribution Volume.
+//
+// The A/D line is used to help assess price trends and potentially spot
+// forthcoming reversals. If a security’s price is in a downtrend while
+// the A/D line is in an uptrend, then the indicator shows there may be
+// buying pressure and the security’s price may reverse to the upside. 
+//
+// Here, we are trying to gauge the A/D trend by comparing three Moving
+// Averages of the calculated Acc/Dist value. If all MA's are lined up
+// on top of each other we call it a strong trend, either (Pos)itive
+// or (Neg)ative. If any MA's are crossing each other, we say the trend
+// is (Weak)ly positive/negative. A positive trend is colored Green and
+// a negative trend is colored Red.
+//
+adShortLen = input.int(defval=9, title="Acc/Dist short MA length", group="Table Info")
+adMediumLen = input.int(defval=21, title="Acc/Dist medium MA length", group="Table Info")
+adLongLen = input.int(defval=50, title="Acc/Dist long MA length", group="Table Info")
+mfm = ((close - low) - (math.max(high,close[1]) - close)) / ta.tr(true)  // adjusted to take Gaps into account
+mfv = mfm * volume
+float ad = mfv
+ad := nz(ad[1]) + mfv
+
+adShort = ta.ema(ad, adShortLen)
+adMedium = ta.ema(ad, adMediumLen)
+adLong = ta.ema(ad, adLongLen)
+
+float adCount = 0
+adCount := adShort > adMedium ? adCount + 1 : (adShort < adMedium ? adCount - 1 : adCount)
+adCount := adShort > adLong ? adCount + 1 : (adShort < adLong ? adCount - 1 : adCount)
+adCount := adMedium > adLong ? adCount + 1 : (adMedium < adLong ? adCount - 1 : adCount)
+
+adColor = adCount > 0 ? green1 : (adCount < 0 ? orangered1 : color.white)
+adStr = adCount == 3 ? "Pos" : (adCount == -3 ? "Neg" : "Weak")
+
+maVol1Color = adCount > 0 ? color.white : orangered1 
+
+//
+// Calculate the Up/Down Volume ratio
+//
+udLen = input.int(defval=50, title="Up/Down Volume length", group="Table Info")
+float upVol = na
+float downVol = na
+upVol := close > open ? volume : 0
+downVol := close < open ? volume : 0
+udVolRatio = math.round(math.sum(upVol, udLen) / math.sum(downVol, udLen), 1)
+udVolRatioStr = str.tostring(udVolRatio)
+udVolRatioColor = udVolRatio >= 1.5 ? green1 : (udVolRatio <= 0.5 ? orangered1 : color.white)
+
+
+tabPos = position.top_right
+text_sz = size.small
+ix1_col = color.white
+
+
+table t = table.new(tabPos, 6, 1, frame_color=color.gray, frame_width=1, border_color=color.gray, border_width=1)
+if barstate.islast
+    table.cell(t, 0, 0, "U/D:", text_halign=text.align_center, text_size=text_sz, text_color=ix1_col)
+    table.cell(t, 1, 0, udVolRatioStr, text_halign=text.align_center, text_size=text_sz, text_color=udVolRatioColor)
+    table.cell(t, 2, 0, "OBV:", text_halign=text.align_center, text_size=text_sz, text_color=ix1_col)
+    table.cell(t, 3, 0, obvStr, text_halign=text.align_center, text_size=text_sz, text_color=obvColor)
+    table.cell(t, 4, 0, "A/D:", text_halign=text.align_center, text_size=text_sz, text_color=ix1_col)
+    table.cell(t, 5, 0, adStr, text_halign=text.align_center, text_size=text_sz, text_color=adColor)
+
+
+//
+// P L O T
+//
+plot(volume, color=vcolor, style=plot.style_columns)
+plot(maVol1, color=maVol1Color, linewidth=2)
+//plot(proxyOBV, color=color.gray, linewidth=2)
+//plot(maVol2, color=orangered3, linewidth=2)
+

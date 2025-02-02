@@ -1,0 +1,136 @@
+//@version=5
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//
+// Quick Stats - shows some important info at the top right corner
+//
+// 1. We display the percentage change of two selected Indices.
+//
+// 2. ADR% - Average Daily Range in percent
+// To quote @qullamaggie: " High ADR is Gold, low ADR is shit..."
+//
+// 3. Trend Template - indicate if the stock is in a good Up Trend
+// We calculates the Trend Template as described by Mark Minervini in his book: "Trade like a stock market wizard"
+// For a stock to be considered all the rules has to be fullfilled.
+// The only rule this indicator doesn't implement is the IBD Relative Strength ranking.
+//
+// Rules:
+//  close > MA-50 > MA-150 > MA-200 , each condition that is true gets one point.
+//  The current stock price is at least 30 percent above its 52-week low, gets one point
+//  The current stock price is within at least 25 percent of its 52-week high, gets one point.
+//  The 200-day moving average line is trending up for at least 1 month (preferably 4–5 months), gets one point.
+//
+// When we get 6 points, all the rules are fullfilled and we display an OK;
+// else we show the number of points (X).
+//
+indicator("Quick Stats", overlay=true)
+
+// Use Green/Red that works for a color blind!
+green1 = color.new(#00ff00, 0)
+green2 = color.new(#00ee00, 0)
+green3 = color.new(#00cd00, 0)
+
+orangered1 = color.new(#ff4500, 0)
+orangered2 = color.new(#ee4000, 0)
+orangered3 = color.new(#cd3700, 0)
+
+// User selectable colors.
+text_col = input(title="Text Color",     defval=color.white)
+bad_col = input(title="Bad Value Color", defval=orangered1)
+
+text_sz = size.small
+
+// Change in percent
+cpt(_x, _x1) =>
+    _cpt = ((_x / _x1) - 1) * 100
+    _cpt
+
+//
+// TREND TEMPLATE calculation
+//
+src = close
+ma50 = ta.sma(src, 50)
+ma150 = ta.sma(src, 150)
+ma200 = ta.sma(src, 200)
+
+sma50 = request.security(syminfo.tickerid,  "1D", ma50,  gaps=barmerge.gaps_on)
+sma150 = request.security(syminfo.tickerid, "1D", ma150, gaps=barmerge.gaps_on)
+sma200 = request.security(syminfo.tickerid, "1D", ma200, gaps=barmerge.gaps_on)
+
+w52low = ta.lowest(src, 52)
+w52high = ta.highest(src, 52)
+week52low = request.security(syminfo.tickerid, "W", w52low)
+week52high = request.security(syminfo.tickerid, "W", w52high)
+
+float monotonic = na
+monotonic := (sma200[0] > sma200[1]) ? 1 :0
+
+int tq = 0
+tq_gt(_s1, _s2, _tq) =>
+    if (_s1 > _s2)
+        _tq + 1
+    else
+        _tq - 1
+
+// Rule 1,2,4,5
+tq := tq_gt(src, sma50,  tq)
+tq := tq_gt(sma50,  sma150, tq)
+tq := tq_gt(sma150, sma200, tq)
+// Rule 3 (using 50 days, i.e 10 weeks or 2.5 months)
+tq := (math.sum(monotonic, 50) == 50) ? tq + 1 : tq
+// Rule 6
+tq := (src * 1.3) > week52low ? tq + 1 : tq
+// Rule 7
+tq := src > (week52high * 0.75) ? tq + 1 : tq
+
+// Construct the TrendTemplate string
+//TTstr = tq == 6 ? "TT:OK" : "TT(" + tostring(tq, "#") + ")"
+TTstr = tq == 6 ? "OK" : str.tostring(tq, "#")
+tt_col= tq == 6 ? text_col : bad_col
+
+// 
+// ADR% calculation
+//
+// Original: alpine_trader
+// Amended 08/12/20 by TheScrutiniser, MikeC on advise from GlinckEastwoot
+// ADR% calculation
+Length = input(20, title="ADR length")
+dhigh = request.security(syminfo.tickerid, 'D', high)
+dlow  = request.security(syminfo.tickerid, 'D', low)
+ADR = 100 * (ta.sma(dhigh/dlow, Length) - 1)
+ADRstr = str.tostring(math.round(ADR,2)) + "%"
+
+
+
+//
+// Get info for 2 selected Indices
+//
+indexId1 = input.symbol(defval="OMXSPI", title="Symbol 1")
+indexId2 = input.symbol(defval="SPX", title="Symbol 2")
+indexSerie1 = request.security(indexId1, "D", close)
+indexSerie1prev = indexSerie1[1]
+indexSerie2 = request.security(indexId2, "D", close)
+indexSerie2prev = request.security(indexId2, "D", close[1])
+indexChangePercent1 = cpt(indexSerie1, indexSerie1prev)
+indexChangePercent2 = cpt(indexSerie2, indexSerie2prev)
+xcpStr1 = str.tostring(math.round(indexChangePercent1, 2))
+xcpStr2 = str.tostring(math.round(indexChangePercent2, 2))
+xcpStr = indexId1 + ": " + xcpStr1 + "% , " + indexId2 + ": " + xcpStr2 + "%"
+ix1_col = indexChangePercent1 < 0 ? bad_col : text_col
+ix2_col = indexChangePercent2 < 0 ? bad_col : text_col
+
+
+
+//
+// Construct the Table
+//
+tabPos = position.top_right
+
+table t = table.new(tabPos, 4, 1, frame_color=color.gray, frame_width=1, border_color=color.gray, border_width=1)
+if barstate.islast
+    //   
+    table.cell(t, 0, 0, indexId1 + ": " + xcpStr1 + "%", text_halign=text.align_center, text_size=text_sz, text_color=ix1_col)
+    table.cell(t, 1, 0, indexId2 + ": " + xcpStr2 + "%", text_halign=text.align_center, text_size=text_sz, text_color=ix2_col)
+    table.cell(t, 2, 0, "ADR%: " + ADRstr, text_halign=text.align_center, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 0, "TT: " + TTstr, text_halign=text.align_center, text_size=text_sz, text_color=tt_col)
+
