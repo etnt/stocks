@@ -9,6 +9,28 @@ Have a look at this [video](https://youtu.be/DV2nnXCDXNk?si=8qfXGwztY7jiBaQz)
 
 The AppScript used can be found [here](AppScript/balanced_portfolio.gs)
 
+### How to calculate the current value of your Investment Fund Shares
+
+From within your Google Sheet, it is easy to get hold of the current
+price of an ordinary stock or index by using the `=googlefinance(TICKER, "price")`.
+
+It is a little trickier to get hold of the NAV (Net Asset Value) for
+an Investment Fund, nut here is a way to do it; we will parse the relevant
+page from Funancial Times, by using an XPath expression, like this:
+
+```
+=importxml(CONCAT("https://markets.ft.com/data/funds/tearsheet/summary?s=",CELL),"/html/body/div[3]/div[2]/section[1]/div[1]/div[1]/div[1]/div[2]/ul[1]/li[1]/span[2]")
+```
+
+Make sure to replace the `CELL` with the Google Sheet cell number where the funds
+`ISIN` number is located. Note that if it is a Swedish fund then you have to append
+a `:SEK` to the ISIN number.
+
+Example:
+
+<img src="images/fund-example.png" width=600 />
+
+
 ### Record a portfolio value once a day
 
 Here we will record a portfolio value by appendng the value to a table,
