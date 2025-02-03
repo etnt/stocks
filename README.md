@@ -30,6 +30,37 @@ Example:
 
 <img src="images/fund-example.png" width=600 />
 
+Also, with stocks it is easy to get hold of the change since yesterday using the:
+`=googlefinance(TICKER, "changepct")` function. With a fund, getting the value
+as shown above we, can make us of a simple AppScript running at the end of the day
+to copy the fund NAV value into a _"yesterdays NAV"_ cell.
+
+Modify the following script for the relevant Sheet names and Cells, then run
+it by a trigger (see video below, how to setup a trigger) just before midnight every day:
+
+```javascript
+/*
+ * Run this function at the end of day to copy the todays value,
+ * to be used "tomorrow" as the "yesterday value".
+ */
+function yesterdaysValues() {
+  // Get the spreadsheet and sheets.
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  // Sheet containing the value to copy (Source)
+
+  var sourceSheet = ss.getSheetByName("Portfolio");
+  var targetSheet = sourceSheet;
+
+  // Get the cell containing the value to copy (Source Sheet)
+  var sourceValueCell = sourceSheet.getRange("J22");
+
+  // Get the target cell (Target Sheet)
+  var targetRange = targetSheet.getRange("N22");
+
+  // Copy the value
+  targetRange.setValue(sourceValueCell.getValue());
+}
+```
 
 ### Record a portfolio value once a day
 
