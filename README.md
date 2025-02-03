@@ -19,7 +19,7 @@ an Investment Fund, but here is a way to do it; we will parse the relevant
 page from Financial Times, by using an XPath expression, like this:
 
 ```
-=importxml(CONCAT("https://markets.ft.com/data/funds/tearsheet/summary?s=",CELL),"/html/body/div[3]/div[2]/section[1]/div[1]/div[1]/div[1]/div[2]/ul[1]/li[1]/span[2]")
+=importxml(CONCAT("https://markets.ft.com/data/funds/tearsheet/summary?s=",CELL),"/html/body/div[3]/div[2]/section[1]/div[1]/div[1]/div[1]/div[2]/ul[1]/li[1]/span[2]","en_US")
 ```
 
 Make sure to replace the `CELL` with the Google Sheet cell number where the funds
