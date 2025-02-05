@@ -3,6 +3,14 @@
 
 ## Google Sheet, AppScript and AppSheet
 
+### Create sortable columns
+
+Have a look at this [video](https://youtu.be/yMr-fz7ObFE?si=VTuzY3f3Dfp4VRuE)
+
+Here we show how to create a filter view of a table so that it can be sorted
+based on the values in the column of choice. By clicking on the column header
+we can toggle between ascending or descending sort order.
+
 ### Create a balanced stock portfolio using Google Sheet and AppScript
 
 Have a look at this [video](https://youtu.be/DV2nnXCDXNk?si=8qfXGwztY7jiBaQz)
