@@ -166,6 +166,9 @@ We also allow for expressing the Account size in currencies other than USD.
 * Account Size in USD and trading US stocks: select USD
 * Account Size in SEK but trading US stocks: select USDSEK
 
+This [video](https://youtu.be/XE9M9t9W7vw?si=lPR7odkRA_nR_NiR) explain how to
+use this Position Sizes Account table.
+
 ### Quick Stats
 
 The script can be found [here](PineScript/quick-stats.pine).
