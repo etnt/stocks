@@ -167,3 +167,77 @@ ph = plot(inside == 1 ? vh : na, title="Inside Bars High", style=plot.style_line
 pl = plot(inside == 1 ? vl : na, title="Inside Bars Low", style=plot.style_linebr, linewidth=line_width, color=color_line)
 fill(ph, pl, color=color_fill)
 
+//
+// Rate of Change Divergence
+//
+roc_len1 = input.int(title="ROC Length 1",  minval=1, defval=10)
+roc_len2 = input.int(title="ROC Length 2", minval=1, defval=30)
+
+proc1 = ((close - close[roc_len1]) / close[roc_len1]) * 100
+proc2 = ((close - close[roc_len2]) / close[roc_len2]) * 100
+
+// Check for a possible Bullish trend shift.
+proc1_rising = proc1[0] > proc1[1]
+proc2_falling = proc2[0] < proc2[1]
+
+is_possible_trend_shift = ta.rsi(close,14) < 50 and proc1_rising and proc2_falling
+
+plot(is_possible_trend_shift ? low * 0.95 : na, color=color.blue, style=plot.style_circles, linewidth=3)
+
+
+// Keltner Channels use ATR to calculate the upper and lower bands, while Bollinger Bands use standard deviation.
+//
+// The BB/KC Squeeze Indicator combines the concepts of Bollinger Bands and Keltner Channels to identify periods
+// of low volatility or “squeeze” conditions. A squeeze is identified when the Bollinger Bands are within
+// the Keltner Channels, indicating that the price may soon break out of its current range.
+//
+// Periods of high volatility on a daily chart is indicated based on the width of Bollinger Bands.
+// It plots a yellow marker at the top of the chart when volatility is high and increasing/stable,
+// and a red marker when volatility is high but decreasing. The script helps visualize when volatility
+// spikes and whether those spikes are potentially ending.
+
+//
+// Calculate the Squeeze
+//
+show_squeeze = input(defval=true,  title="Show Squeeze")
+
+bb_src = input(defval=close, title="BB source")
+length = input(defval=20,    title="BB Length")
+mult = input(defval=2.0,     title="BB MultFactor")
+kc_src = input(defval=hlc3,  title="KC source")
+lengthKC = input(defval=20,  title="KC Length")
+multKC = input(defval=1.0,   title="KC MultFactor")
+
+// Calculate BB
+[basis, upperBB, lowerBB] = ta.bb(bb_src, length, mult)
+
+// Calculate KC
+ma = ta.sma(kc_src, lengthKC)
+atr_range = ta.atr(lengthKC) * multKC
+upperKC = ma + atr_range
+lowerKC = ma - atr_range
+
+sqzOn  = (lowerBB > lowerKC) and (upperBB < upperKC)
+
+lwst = ta.lowest(close, 100) * 0.75
+
+// Calculate the dotted line representing the 'squeeze'
+float sq = sqzOn? lwst : na
+sq := sqzOn ? (na(sq[1]) ? lwst : sq[1]) : na
+
+plotshape(show_squeeze and isDaily ? sq : na, title="Squeeze markings", location=location.top, color=color.white)
+
+gee = color.new(#eeeeee, 95)
+bgcolor(title="Squeeze area", color=show_squeeze and sqzOn ? gee : na)
+
+//
+// Trends die after High Volatility
+//
+show_high_volatility = input(defval=true,  title="Show High Volatility")
+[smiddle, supper, slower] = ta.bb(close, 20, 2)
+
+bbw = ((supper - slower) / smiddle) * 100
+
+vol_clr = (bbw > 25) ? (bbw[0] >= bbw[1] ? color.yellow : color.red) : na
+
+plotshape((bbw > 25) and show_high_volatility and isDaily ? close : na, title="Volatility markings", location=location.top, color=vol_clr)
