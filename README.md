@@ -139,6 +139,35 @@ could occur.
 
 It is also possible to display a `Bollinger Band` and to display the `close/ema21 ratio in percent`.
 
+But wait, there is more, look at this chart:
+
+<img src="images/squeeze-volatility-roc.png" width=800/>
+
+**Keltner Channels** use ATR to calculate the upper and lower bands, while **Bollinger
+Bands** use standard deviation.
+The **BB/KC Squeeze Indicator** combines the concepts of Bollinger Bands and Keltner
+Channels to identify periods of low volatility or “squeeze” conditions. A squeeze
+is identified when the Bollinger Bands are within the Keltner Channels, indicating
+that the price may soon break out of its current range and is plotted as white marks
+at the top with a faint shadowed "curtain". Periods of high volatility
+on a daily chart is indicated based on the width of Bollinger Bands. It plots a
+yellow marker at the top of the chart when volatility is high and increasing/stable,
+and a red marker when volatility is high but decreasing. The script helps visualize
+when volatility spikes and whether those spikes are potentially ending.
+As someone said: _"Trends die after High Volatility"_.
+
+**RoC divergence**: The idea is to identify a possible Bullish Trend Shift.
+The rules are:
+
+1. ROC(10) is rising.
+2. ROC(30) is falling.
+3. RSI(14) < 50
+
+When all the rules are triggered this is indicated with a blue circle below the candle.
+Note that this doesn't give you a Buy signal; you also have to get a confirmation from
+the price graph, e.g by crossing a trend line.
+(_Idea curtesy: Tobbe Rosèn_)  
+
 ### Position Sizes
 
 The script can be found [here](PineScript/position-sizes.pine).
