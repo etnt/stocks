@@ -247,3 +247,26 @@ a moving average is displayed; positive/negative in green/red.
 
 *The trend*  (Positive/Negative/Weak) of the *Acc/Dist indicator*
 is displayed in either green/red.
+
+
+### Comparing Sectors
+
+A dynamic industry sector performance comparison indicator that helps traders
+and investors track relative strength across different market sectors in real-time.
+
+The script can be found [here](PineScript/industry-indices-comparison.pine).
+
+<img src="images/industry-indeces-comparision.png" width=800/>
+
+The displayed table compares up to 5 industry sector ETFs against a benchmark
+index (default: SPY).
+
+The indicator helps identify:
+
+1. Sector rotation patterns through relative performance
+2. Leading and lagging sectors vs the broader market
+3. Volume trends across different sectors
+4. Sector-specific momentum through trend indicators
+
+For traders it can be valuable information to know if a potential trade is
+in a stock belonging to a currently strong sector.
