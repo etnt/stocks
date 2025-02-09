@@ -38,7 +38,7 @@ mango = color.new(#fdbe02, 0)
 neoncarrot = color.new(#ffa343, 0)
 orangepeel = color.new(#ff9f00, 0)
 goldenpoppy = color.new(#fcc200, 0)
-gold2 = color.new(#eec900, 0)
+gold2 = color.new(#eec900, 70)
 
 // Use Green/Red that works for a color blind!
 green1 = color.new(#00ff00, 0)
@@ -51,10 +51,12 @@ orangered3 = color.new(#cd3700, 0)
 
 volLen1 = input(defval=20, title="MA length", group="Volume Lookback")
 ppLen = input(defval=10, title="Pocket Pivot length", group="Volume Lookback")
+maVol1 = ta.sma(volume, volLen1)
 
 closeDown = close < close[1]
 ppVol = volume >= ta.highest(volume[1], ppLen)
-lowVol = volume < ta.lowest(volume[1], ppLen)
+//lowVol = volume < ta.lowest(volume[1], ppLen)
+lowVol = volume < maVol1
 
 //
 // Pocket Pivot Calculation
@@ -69,13 +71,12 @@ else
 is_pp = volume > ta.highest(pp[1], ppLen)
 
 // Column Color
-vcolor = is_pp and greenDay ? color.lime : (lowVol ? gold2 : (closeDown ? darkblue : lightblue))
-
+//vcolor = is_pp and greenDay ? color.lime : (lowVol ? gold2 : (closeDown ? darkblue : lightblue))
+vcolor = is_pp and greenDay ? color.lime : (lowVol ? gold2 : (closeDown ? darkblue : color.green))
 
 //
 // Display the percentage the Volume is above its Moving Average.
 //
-maVol1 = ta.sma(volume, volLen1)
 volAvgPercent = 100*(volume/maVol1 - 1)
 isHighVol = volAvgPercent >= 50
 volText = "+" + str.tostring(math.round(volAvgPercent))
