@@ -66,6 +66,36 @@ show21ratio = input.bool(defval=true, title="Display close/ema21 ratio")
 ema21Ratio = 100 * (close/MA20 -1)
 ema21RatioStr = str.tostring(math.round(ema21Ratio)) + "%"
 
+// 
+// ADR% calculation
+//
+// Original: alpine_trader
+// Amended 08/12/20 by TheScrutiniser, MikeC on advise from GlinckEastwoot
+// ADR% calculation
+showADR = input.bool(defval=false, title="Display ADR%")
+Length = input(20, title="ADR length")
+whigh = request.security(syminfo.tickerid, 'W', high)
+wlow  = request.security(syminfo.tickerid, 'W', low)
+ADR = 100 * (ta.sma(whigh/wlow, Length) - 1)
+ADRstr = str.tostring(math.round(ADR,2)) + "%"
+
+var float adrtrack21 = na
+var label adrtrackLabels = na
+if barstate.islast and showADR
+    adrlbl = label.new(na, na, "", style=label.style_none, size=size.small, textcolor=color.yellow, color=color.black, yloc=yloc.price)
+    adrtrackLabels := adrlbl
+    adrtrack21 := high
+    // Update the label's position, text and tooltip.
+    //label.set_xy(lbl, bar_index[highestBarOffset], hi)
+    label.set_xy(adrlbl, bar_index, high * 1.15)
+    label.set_text(adrlbl, ADRstr)
+else
+    adrtrackLabels := na
+    adrtrack21 := na
+
+if barstate.islast and (adrtrackLabels[1] != na)
+    label.delete(adrtrackLabels[1])
+
 var float track21 = na
 var label trackLabels = na
 // Display the percentage that close is above MA20; only on the last bar.
@@ -115,11 +145,13 @@ plotEMA65 = plot65 and isIntraday
 //
 // Calculate MA10 and MA40 for the Weekly timeframe.
 //
-plotW10 = input(defval=true, title="Plot MA10", group="Weekly Moving Averages")
-plotW40 = input(defval=true, title="Plot MA40", group="Weekly Moving Averages")
+plotW10 = input(defval=true, title="Plot short Weekly MA", group="Weekly Moving Averages")
+plotW40 = input(defval=true, title="Plot long Weekly MA", group="Weekly Moving Averages")
+shortWeeklyMA = input.int(defval=10, title="Short Weekly MA", group="Weekly Moving Averages")
+longWeeklyMA = input.int(defval=30, title="Long Weekly MA", group="Weekly Moving Averages")
 weekly = request.security(syminfo.tickerid, 'W', close)
-WMA10 = ta.sma(weekly, 10)
-WMA40 = ta.sma(weekly, 40)
+WMA10 = ta.sma(weekly, shortWeeklyMA)
+WMA40 = ta.sma(weekly, longWeeklyMA)
 plotWMA10 = isWeekly and plotW10 ? true : false
 plotWMA40 = isWeekly and plotW40 ? true : false
 
@@ -137,23 +169,26 @@ plot(series=plotWMA10 ? WMA10 : na, linewidth=1, color=color.teal,   title="WMA1
 plot(series=plotWMA40 ? WMA40 : na, linewidth=1, color=color.fuchsia,title="WMA40",  style=plot.style_circles)
 
 
+
+show_inside_bar = input(defval=true,  title="Show Inside Bar")
 float inside = 0.0
-if (high <= high[1]) and (low >= low[1])
-    inside := 1
-else if inside[1] == 1
-    int i = 2
-    while true
-        if inside[i] == 1
-            i := i + 1
-            continue
-        else if (high <= high[i]) and (low >= low[i])
-            inside := 1
-            break
-        else
-            inside := 0
-            break
-else
-    inside := 0
+if show_inside_bar
+    if (high <= high[1]) and (low >= low[1])
+        inside := 1
+    else if inside[1] == 1
+        int i = 2
+        while true
+            if inside[i] == 1
+                i := i + 1
+                continue
+            else if (high <= high[i]) and (low >= low[i])
+                inside := 1
+                break
+            else
+                inside := 0
+                break
+    else
+        inside := 0
 
 vh = ta.valuewhen(inside[1] == 0 and inside == 1, high[1], 0)
 vl = ta.valuewhen(inside[1] == 0 and inside == 1, low[1],  0)
@@ -225,7 +260,7 @@ lwst = ta.lowest(close, 100) * 0.75
 float sq = sqzOn? lwst : na
 sq := sqzOn ? (na(sq[1]) ? lwst : sq[1]) : na
 
-plotshape(show_squeeze and isDaily ? sq : na, title="Squeeze markings", location=location.top, color=color.white)
+plotshape(show_squeeze ? sq : na, title="Squeeze markings", location=location.top, color=color.white)
 
 gee = color.new(#eeeeee, 95)
 bgcolor(title="Squeeze area", color=show_squeeze and sqzOn ? gee : na)
@@ -240,4 +275,5 @@ bbw = ((supper - slower) / smiddle) * 100
 
 vol_clr = (bbw > 25) ? (bbw[0] >= bbw[1] ? color.yellow : color.red) : na
 
-plotshape((bbw > 25) and show_high_volatility and isDaily ? close : na, title="Volatility markings", location=location.top, color=vol_clr)
+plotshape((bbw > 25) and show_high_volatility ? close : na, title="Volatility markings", location=location.top, color=vol_clr)
+
