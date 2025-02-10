@@ -74,8 +74,8 @@ ema21RatioStr = str.tostring(math.round(ema21Ratio)) + "%"
 // ADR% calculation
 showADR = input.bool(defval=false, title="Display ADR%")
 Length = input(20, title="ADR length")
-whigh = request.security(syminfo.tickerid, 'W', high)
-wlow  = request.security(syminfo.tickerid, 'W', low)
+whigh = request.security(syminfo.tickerid, timeframe.period, high)
+wlow  = request.security(syminfo.tickerid, timeframe.period, low)
 ADR = 100 * (ta.sma(whigh/wlow, Length) - 1)
 ADRstr = str.tostring(math.round(ADR,2)) + "%"
 
