@@ -1,0 +1,45 @@
+//@version=6
+
+// Use this indicator to compare how security is performing in compare with prefered index (SPX by default). 
+// > 0 outperforming 
+// < 0 underperforming
+// Works best for weekly, but can be applied to monthly and daily charts. It will be rather useless to use it in smaller timeframes
+// Apply it to SPX, industry index, sector index or other security in similar sector
+
+// UPDATE 1: Added sector and industry as optional params. Leave them same as index if you don't want to use them
+
+indicator("Mansfield Relative Strength indicator", overlay=false)
+
+index = input.symbol(title="Index", defval="SP:SPX")
+sector = input.symbol(title="Sector (optional)", defval="SP:SPX")
+industry = input.symbol(title="Industry (optional)", defval="SP:SPX")
+
+ma_type = input.string(title="Which moving average to use?", defval="SMA", options=["SMA", "WMA", "EMA"])
+len_daily = input(title="MA length for Daily", defval=200)
+len_weekly = input(title="MA length for Weekly", defval=52)
+len_monthly = input(title="MA length for Monthly", defval=10)
+len_other = input(title="MA length for all other periods", defval=52)
+val = close
+
+period = timeframe.period
+len = period == "W" ? len_weekly : (period == "D" ? len_daily : (period == "M" ? len_monthly : len_other))
+
+ma_func(x, length) =>
+    ma_type == "WMA" ? ta.wma(x, length) : (ma_type == "SMA" ? ta.sma(x, length) : ta.ema(x, length))
+
+  
+calc_mrs_func(x, ind, length) =>
+    security = request.security(ind, period, x)
+    ((x / security) / ma_func((x / security), length) - 1) * 10
+
+
+mrs_index = calc_mrs_func(val, index, len)
+mrs_sector = calc_mrs_func(val, sector, len)
+mrs_industry = calc_mrs_func(val, industry, len)
+c = math.sign(mrs_index) + math.sign(mrs_sector) + math.sign(mrs_industry)
+
+bgcolor(c == 3 ? color.new(color.green, 80) : c == 2 ? color.new(color.green, 75) : c == 1 ? color.new(color.green, 70) : c == -1 ? color.new(color.red, 70) : c == -2 ? color.new(color.red, 75) : c == -3 ? color.new(color.red, 80) : color.gray)
+plot(mrs_index, linewidth=3, title="MRS index")
+plot(mrs_sector != mrs_index ? mrs_sector : na, linewidth=2, title="MRS sector")
+plot(mrs_industry != mrs_index ? mrs_industry : na, linewidth=1, title="MRS industry")
+hline(price=0, linestyle=hline.style_dashed, title="Zero baseline")
