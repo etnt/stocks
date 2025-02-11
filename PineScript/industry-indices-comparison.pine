@@ -31,17 +31,12 @@
 // - Monitor sector performance relative to the market benchmark
 // - Identify strong sectors for potential long positions
 // - Spot weak sectors for potential short positions or sector rotation
-// - Track volume patterns for confirmation of sector moves:
-//   * Higher than average volume often confirms the strength of a trend
-//   * High volume on upward moves suggests institutional buying
-//   * High volume on downward moves suggests institutional selling
-//   * Low volume moves are generally less reliable and may reverse
-//   * Comparing volumes across sectors helps identify where big money is flowing
+// - Track volume patterns for confirmation of sector moves
 //
 // Note: Performance calculations are based on price change over the selected timeframe,
 // with relative performance measured against the benchmark index.
 
-indicator("Industry Indices Comparison", overlay=false)
+indicator("Industry Indices Comparison", overlay=true)
 
 // Color constants
 GREEN = color.new(#26a69a, 0)
@@ -59,6 +54,7 @@ index2Symbol = input.symbol("XLF", "Financials Index", group="Index Selection")
 index3Symbol = input.symbol("XLE", "Energy Index", group="Index Selection")
 index4Symbol = input.symbol("XLV", "Healthcare Index", group="Index Selection")
 index5Symbol = input.symbol("XLI", "Industrials Index", group="Index Selection")
+index6Symbol = input.symbol("XLB", "Materials Index", group="Index Selection")
 
 // Industry names
 index1Name = input.string("Technology", "Technology Name", group="Industry Names")
@@ -66,9 +62,10 @@ index2Name = input.string("Financials", "Financials Name", group="Industry Names
 index3Name = input.string("Energy", "Energy Name", group="Industry Names")
 index4Name = input.string("Healthcare", "Healthcare Name", group="Industry Names")
 index5Name = input.string("Industrials", "Industrials Name", group="Industry Names")
+index6Name = input.string("Materials", "Materials Name", group="Industry Names")
 
 // Timeframe selection
-timeframeInput = input.string("1M", "Comparison Timeframe", options=["1D", "1W", "1M", "3M", "YTD"], group="Settings")
+timeframeInput = input.string("1M", "Comparison Timeframe", options=["1D", "1W", "1M", "3M"], group="Settings")
 
 // Visual settings
 tablePosition = input.string("Top Right", "Table Position", options=["Top Right", "Top Left", "Bottom Right", "Bottom Left"], group="Appearance")
@@ -100,6 +97,7 @@ var index2Perf = 0.0
 var index3Perf = 0.0
 var index4Perf = 0.0
 var index5Perf = 0.0
+var index6Perf = 0.0
 
 if barstate.islast
     benchmarkPerf := getPerformance(benchmarkSymbol)
@@ -108,6 +106,7 @@ if barstate.islast
     index3Perf := getPerformance(index3Symbol)
     index4Perf := getPerformance(index4Symbol)
     index5Perf := getPerformance(index5Symbol)
+    index6Perf := getPerformance(index6Symbol)
 
 // Calculate relative performances
 relativePerf1 = index1Perf - benchmarkPerf
@@ -115,6 +114,7 @@ relativePerf2 = index2Perf - benchmarkPerf
 relativePerf3 = index3Perf - benchmarkPerf
 relativePerf4 = index4Perf - benchmarkPerf
 relativePerf5 = index5Perf - benchmarkPerf
+relativePerf6 = index6Perf - benchmarkPerf
 
 // Format numbers
 formatPerf(value) =>
@@ -136,7 +136,7 @@ var txtSize = switch textSize
     => size.small
 
 // Create and populate table
-var table perfTable = table.new(tablePos, 6, 7, border_width=1)
+var table perfTable = table.new(tablePos, 6, 8, border_width=1)
 
 // Function to determine trend
 getTrendSymbol(perf) =>
@@ -180,3 +180,5 @@ if barstate.islast
     addIndexRow(index3Symbol, index3Name, index3Perf, relativePerf3, 4)
     addIndexRow(index4Symbol, index4Name, index4Perf, relativePerf4, 5)
     addIndexRow(index5Symbol, index5Name, index5Perf, relativePerf5, 6)
+    addIndexRow(index6Symbol, index6Name, index6Perf, relativePerf6, 7)
+    
