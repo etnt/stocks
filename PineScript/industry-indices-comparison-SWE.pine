@@ -46,7 +46,7 @@ TEXT_COLOR = color.new(#FFFFFF, 0)
 
 // Input parameters
 // Benchmark selection
-benchmarkSymbol = input.symbol("SPY", "Benchmark Index", group="Index Selection")
+benchmarkSymbol = input.symbol("OMXSTO:OMXSPI", "Benchmark Index", group="Index Selection")
 
 // Industry indices selection
 index1Symbol = input.symbol("SX10PI", "Technology Index", group="Index Selection")
