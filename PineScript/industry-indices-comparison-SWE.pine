@@ -1,0 +1,214 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//@version=6
+// @description A dynamic industry sector performance comparison indicator that helps traders and investors
+// track relative strength across different market sectors in real-time.
+//
+// Features:
+// - Compares up to 5 industry sector ETFs against a benchmark index (default: SPY)
+// - Displays key metrics including:
+//   * Current price
+//   * Performance % over selected timeframe
+//   * Relative performance vs benchmark
+//   * Trend direction (▲ up, ▼ down, − neutral)
+//   * Volume in millions (M) of shares traded
+// - Configurable timeframes: 1D, 1W, 1M, 3M, and YTD comparisons
+// - Color-coded performance indicators (green for outperformance, red for underperformance)
+// - Customizable table position and text size for optimal chart placement
+//
+// Default Configuration:
+// - Benchmark: SPY (S&P 500 ETF)
+// - Industry Indices: XLK (Technology), XLF (Financials), XLE (Energy), XLV (Healthcare), XLI (Industrials)
+// - Timeframe: 1M (Monthly comparison)
+//
+// The indicator helps identify:
+// 1. Sector rotation patterns through relative performance
+// 2. Leading and lagging sectors vs the broader market
+// 3. Volume trends across different sectors
+// 4. Sector-specific momentum through trend indicators
+//
+// Usage:
+// - Monitor sector performance relative to the market benchmark
+// - Identify strong sectors for potential long positions
+// - Spot weak sectors for potential short positions or sector rotation
+// - Track volume patterns for confirmation of sector moves
+//
+// Note: Performance calculations are based on price change over the selected timeframe,
+// with relative performance measured against the benchmark index.
+
+indicator("Industry Indices Comparison - SWE", overlay=true)
+
+// Color constants
+GREEN = color.new(#26a69a, 0)
+RED = color.new(#ef5350, 0)
+GRAY = color.new(#787B86, 0)
+TEXT_COLOR = color.new(#FFFFFF, 0)
+
+// Input parameters
+// Benchmark selection
+benchmarkSymbol = input.symbol("SPY", "Benchmark Index", group="Index Selection")
+
+// Industry indices selection
+index1Symbol = input.symbol("SX10PI", "Technology Index", group="Index Selection")
+index2Symbol = input.symbol("SX30PI", "Financials Index", group="Index Selection")
+index3Symbol = input.symbol("SX60PI", "Energy Index", group="Index Selection")
+index4Symbol = input.symbol("SX20PI", "Healthcare Index", group="Index Selection")
+index5Symbol = input.symbol("SX50PI", "Industrials Index", group="Index Selection")
+index6Symbol = input.symbol("SX55PI", "Materials Index", group="Index Selection")
+index7Symbol = input.symbol("SX45PI", "Consum.Staples Index", group="Index Selection")
+index8Symbol = input.symbol("SX35PI", "Real Estate Index", group="Index Selection")
+index9Symbol = input.symbol("SX65PI", "Utilities Index", group="Index Selection")
+index10Symbol = input.symbol("SX40PI", "Consum.Disc Index", group="Index Selection")
+index11Symbol = input.symbol("SX15PI", "Telecom Index", group="Index Selection")
+
+// Industry names
+index1Name = input.string("Teknik", "Technology Name", group="Industry Names")
+index2Name = input.string("Finans", "Financials Name", group="Industry Names")
+index3Name = input.string("Energi", "Energy Name", group="Industry Names")
+index4Name = input.string("Hälsovård", "Healthcare Name", group="Industry Names")
+index5Name = input.string("Industri", "Industrials Name", group="Industry Names")
+index6Name = input.string("Råvaror", "Materials Name", group="Industry Names")
+index7Name = input.string("Dagligvaror", "Consum.Staples Name", group="Industry Names")
+index8Name = input.string("Fastigheter", "Real Estate Name", group="Industry Names")
+index9Name = input.string("Kraftförsörjning", "Utilities Name", group="Industry Names")
+index10Name = input.string("Sällanköpsvaror", "Consum.Disc Name", group="Industry Names")
+index11Name = input.string("Telekom", "Telecom Name", group="Industry Names")
+
+// Timeframe selection
+timeframeInput = input.string("1M", "Comparison Timeframe", options=["1D", "1W", "1M", "3M"], group="Settings")
+
+// Visual settings
+tablePosition = input.string("Top Right", "Table Position", options=["Top Right", "Top Left", "Bottom Right", "Bottom Left"], group="Appearance")
+textSize = input.string("Small", "Text Size", options=["Tiny", "Small", "Normal"], group="Appearance")
+outperformColor = input.color(GREEN, "Outperform Color", group="Appearance")
+underperformColor = input.color(RED, "Underperform Color", group="Appearance")
+
+// Helper functions
+getTimeframeOffset() =>
+    offset = switch timeframeInput
+        "1D" => 1
+        "1W" => 7
+        "1M" => 30
+        "3M" => 90
+        => 30  // Default to 1M
+
+getPerformance(sym) =>
+    float performance = 0.0
+    offset = getTimeframeOffset()
+    [currentClose, prevClose] = request.security(sym, timeframe.period, [close, close[offset]])
+    if prevClose != 0
+        performance := ((currentClose - prevClose) / prevClose) * 100
+    performance
+
+// Calculate performances
+var benchmarkPerf = 0.0
+var index1Perf = 0.0
+var index2Perf = 0.0
+var index3Perf = 0.0
+var index4Perf = 0.0
+var index5Perf = 0.0
+var index6Perf = 0.0
+var index7Perf = 0.0
+var index8Perf = 0.0
+var index9Perf = 0.0
+var index10Perf = 0.0
+var index11Perf = 0.0
+
+if barstate.islast
+    benchmarkPerf := getPerformance(benchmarkSymbol)
+    index1Perf := getPerformance(index1Symbol)
+    index2Perf := getPerformance(index2Symbol)
+    index3Perf := getPerformance(index3Symbol)
+    index4Perf := getPerformance(index4Symbol)
+    index5Perf := getPerformance(index5Symbol)
+    index6Perf := getPerformance(index6Symbol)
+    index7Perf := getPerformance(index7Symbol)
+    index8Perf := getPerformance(index8Symbol)
+    index9Perf := getPerformance(index9Symbol)
+    index10Perf := getPerformance(index10Symbol)
+    index11Perf := getPerformance(index11Symbol)
+
+// Calculate relative performances
+relativePerf1 = index1Perf - benchmarkPerf
+relativePerf2 = index2Perf - benchmarkPerf
+relativePerf3 = index3Perf - benchmarkPerf
+relativePerf4 = index4Perf - benchmarkPerf
+relativePerf5 = index5Perf - benchmarkPerf
+relativePerf6 = index6Perf - benchmarkPerf
+relativePerf7 = index7Perf - benchmarkPerf
+relativePerf8 = index8Perf - benchmarkPerf
+relativePerf9 = index9Perf - benchmarkPerf
+relativePerf10 = index10Perf - benchmarkPerf
+relativePerf11 = index11Perf - benchmarkPerf
+
+// Format numbers
+formatPerf(value) =>
+    str.tostring(math.round(value, 2)) + "%"
+
+// Table position
+var tablePos = switch tablePosition
+    "Top Right" => position.top_right
+    "Top Left" => position.top_left
+    "Bottom Right" => position.bottom_right
+    "Bottom Left" => position.bottom_left
+    => position.top_right
+
+// Text size
+var txtSize = switch textSize
+    "Tiny" => size.tiny
+    "Small" => size.small
+    "Normal" => size.normal
+    => size.small
+
+// Create and populate table
+var table perfTable = table.new(tablePos, 6, 13, border_width=1)
+
+// Function to determine trend
+getTrendSymbol(perf) =>
+    perf > 0 ? "▲" : perf < 0 ? "▼" : "−"
+
+// Function to get cell color based on performance
+getCellColor(perf) =>
+    perf > 0 ? outperformColor : perf < 0 ? underperformColor : GRAY
+
+// Function to add index row
+addIndexRow(sym, name, perf, relPerf, rowNum) =>
+    [price, vol] = request.security(sym, timeframe.period, [close, volume])
+    table.cell(perfTable, 0, rowNum, name, text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 1, rowNum, str.tostring(math.round(price, 2)), text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 2, rowNum, formatPerf(perf), text_color=TEXT_COLOR, bgcolor=getCellColor(perf), text_size=txtSize)
+    table.cell(perfTable, 3, rowNum, formatPerf(relPerf), text_color=TEXT_COLOR, bgcolor=getCellColor(relPerf), text_size=txtSize)
+    table.cell(perfTable, 4, rowNum, getTrendSymbol(perf), text_color=getCellColor(perf), text_size=txtSize)
+    table.cell(perfTable, 5, rowNum, str.tostring(math.round(vol/1000000, 1)) + "M", text_color=TEXT_COLOR, text_size=txtSize)
+
+if barstate.islast
+    // Headers
+    table.cell(perfTable, 0, 0, "Industry", bgcolor=GRAY, text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 1, 0, "Price", bgcolor=GRAY, text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 2, 0, timeframeInput + " %", bgcolor=GRAY, text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 3, 0, "vs " + benchmarkSymbol, bgcolor=GRAY, text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 4, 0, "Trend", bgcolor=GRAY, text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 5, 0, "Volume", bgcolor=GRAY, text_color=TEXT_COLOR, text_size=txtSize)
+
+    // Benchmark row
+    [benchPrice, benchVol] = request.security(benchmarkSymbol, timeframe.period, [close, volume])
+    table.cell(perfTable, 0, 1, benchmarkSymbol, text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 1, 1, str.tostring(math.round(benchPrice, 2)), text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 2, 1, formatPerf(benchmarkPerf), text_color=TEXT_COLOR, bgcolor=getCellColor(benchmarkPerf), text_size=txtSize)
+    table.cell(perfTable, 3, 1, "Benchmark", text_color=TEXT_COLOR, text_size=txtSize)
+    table.cell(perfTable, 4, 1, getTrendSymbol(benchmarkPerf), text_color=getCellColor(benchmarkPerf), text_size=txtSize)
+    table.cell(perfTable, 5, 1, str.tostring(math.round(benchVol/1000000, 1)) + "M", text_color=TEXT_COLOR, text_size=txtSize)
+
+    // Add industry index rows
+    addIndexRow(index1Symbol, index1Name, index1Perf, relativePerf1, 2)
+    addIndexRow(index2Symbol, index2Name, index2Perf, relativePerf2, 3)
+    addIndexRow(index3Symbol, index3Name, index3Perf, relativePerf3, 4)
+    addIndexRow(index4Symbol, index4Name, index4Perf, relativePerf4, 5)
+    addIndexRow(index5Symbol, index5Name, index5Perf, relativePerf5, 6)
+    addIndexRow(index6Symbol, index6Name, index6Perf, relativePerf6, 7)
+    addIndexRow(index7Symbol, index7Name, index7Perf, relativePerf7, 8)
+    addIndexRow(index8Symbol, index8Name, index8Perf, relativePerf8, 9)
+    addIndexRow(index9Symbol, index9Name, index9Perf, relativePerf9, 10)
+    addIndexRow(index10Symbol, index10Name, index10Perf, relativePerf10, 11)
+    addIndexRow(index11Symbol, index11Name, index11Perf, relativePerf11, 12)
+    

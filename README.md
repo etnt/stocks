@@ -270,3 +270,8 @@ The indicator helps identify:
 
 For traders it can be valuable information to know if a potential trade is
 in a stock belonging to a currently strong sector.
+
+[Here](PineScript/industry-indices-comparison-SWE.pine) is the script tailored for the Swedish markets.
+
+<img src="images/branch-index.png" width=800/>
+
