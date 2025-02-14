@@ -205,6 +205,7 @@ fill(ph, pl, color=color_fill)
 //
 // Rate of Change Divergence
 //
+show_roc = input(defval=true,  title="Show Rate of Change Divergence")
 roc_len1 = input.int(title="ROC Length 1",  minval=1, defval=10)
 roc_len2 = input.int(title="ROC Length 2", minval=1, defval=30)
 
@@ -217,7 +218,7 @@ proc2_falling = proc2[0] < proc2[1]
 
 is_possible_trend_shift = ta.rsi(close,14) < 50 and proc1_rising and proc2_falling
 
-plot(is_possible_trend_shift ? low * 0.95 : na, color=color.blue, style=plot.style_circles, linewidth=3)
+plot(is_possible_trend_shift and show_roc ? low * 0.95 : na, color=color.blue, style=plot.style_circles, linewidth=3)
 
 
 // Keltner Channels use ATR to calculate the upper and lower bands, while Bollinger Bands use standard deviation.
@@ -277,3 +278,26 @@ vol_clr = (bbw > 25) ? (bbw[0] >= bbw[1] ? color.yellow : color.red) : na
 
 plotshape((bbw > 25) and show_high_volatility ? close : na, title="Volatility markings", location=location.top, color=vol_clr)
 
+// -------------------
+// H O L Y   G R A I L
+// -------------------
+show_holy_grail = input(defval=true,  title="Show Holy Grail")
+ma20 = ta.sma(close, 20)
+
+// 1. 'low' is below MA-20
+low_below20 = low < ma20
+
+// 2. 'close' is above MA-20 and in the upper quarter of todays range
+var xrange = high - low
+upper_quarter = low + (xrange * 0.75)
+close_above20 = (close > ma20) and (close > upper_quarter)
+
+// 3. MA20 is increasing 
+ma20_increasing = ma20 > ma20[1]
+
+// 4. 'low' of previous day is greater than 'low' of the MA20 of the previous day
+prev_low_gt = low[1] > ma20[1]
+
+is_holy_grail = (low_below20 and close_above20 and ma20_increasing and prev_low_gt)
+
+plotshape(is_holy_grail and show_holy_grail ? close : na, title="Holy Grail +label", location=location.bottom, style=shape.labelup, size=size.tiny, text="H", color=color.black, textcolor=color.lime)
