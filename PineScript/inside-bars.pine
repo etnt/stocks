@@ -1,0 +1,92 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//
+// Inside Bars Indicator
+// 
+// Description:
+// This indicator identifies and highlights price action patterns where a bar's high and low
+// are completely contained within the previous bar's range. Inside bars are significant
+// technical patterns that often signal a period of price consolidation or uncertainty,
+// potentially leading to a breakout in either direction.
+//
+// Trading Literature & Theory:
+// Inside bars are well-documented in technical analysis literature:
+// - Steve Nison discusses them in "Japanese Candlestick Charting Techniques" as a form
+//   of harami pattern, indicating potential trend reversals
+// - Thomas Bulkowski's "Encyclopedia of Chart Patterns" categorizes inside bars as
+//   a consolidation pattern with statistical significance for breakout trading
+// - Alexander Elder references them in "Trading for a Living" as indicators of
+//   decreasing volatility and potential energy build-up
+// - John Murphy's "Technical Analysis of the Financial Markets" includes inside bars
+//   as part of price action analysis for market psychology understanding
+//
+// The pattern is particularly significant because it represents:
+// 1. Volatility Contraction: A narrowing of price range indicating potential energy build-up
+// 2. Institutional Activity: Often shows large players absorbing or distributing positions
+// 3. Decision Point: Market participants evaluating the previous bar's significance
+//
+// Trading Applications:
+// 1. Breakout Trading
+//    - Watch for breaks above the parent bar's high (bullish signal)
+//    - Monitor breaks below the parent bar's low (bearish signal)
+//    - Multiple consecutive inside bars can indicate stronger breakout potential
+//
+// 2. Market Psychology
+//    - Inside bars represent a period of equilibrium between buyers and sellers
+//    - Shows market uncertainty and potential energy building up
+//    - Often precedes significant price movements
+//
+// Best Market Conditions:
+// - Trending markets approaching potential reversal points
+// - After strong momentum moves where the market needs to digest gains
+// - Near key support/resistance levels
+// - During pre-breakout consolidation phases
+//
+// Complementary Indicators:
+// - Volume indicators to confirm breakout strength
+// - Trend indicators (Moving Averages, ADX) for context
+// - Momentum indicators (RSI, MACD) for additional confirmation
+//
+// Risk Management:
+// - Use parent bar's range for stop loss placement
+// - Wait for breakout confirmation before entry
+// - Consider time-based exits if breakout doesn't occur
+// - More reliable on higher timeframes
+//
+// Note: The indicator works best when combined with proper risk management
+// and overall market context analysis. Avoid trading every inside bar pattern
+// and always confirm with volume and other technical indicators.
+//
+//@version=5
+indicator("Inside Bars", overlay=true)
+
+
+float inside = 0.0
+if (high <= high[1]) and (low >= low[1])
+    inside := 1
+else if inside[1] == 1
+    int i = 2
+    while true
+        if inside[i] == 1
+            i := i + 1
+            continue
+        else if (high <= high[i]) and (low >= low[i])
+            inside := 1
+            break
+        else
+            inside := 0
+            break
+else
+    inside := 0
+
+vh = ta.valuewhen(inside[1] == 0 and inside == 1, high[1], 0)
+vl = ta.valuewhen(inside[1] == 0 and inside == 1, low[1],  0)
+
+color_line = input.color(defval=color.yellow, title="Inside Bars Color")
+transp = input.int(defval=90, title="Color transparency", minval=0, maxval=100)
+line_width = input.int(defval=1, title="Line width", minval=1, maxval=4)
+color_fill = color.new(color_line, transp)
+
+ph = plot(inside == 1 ? vh : na, title="Inside Bars High", style=plot.style_linebr, linewidth=line_width, color=color_line)
+pl = plot(inside == 1 ? vl : na, title="Inside Bars Low", style=plot.style_linebr, linewidth=line_width, color=color_line)
+fill(ph, pl, color=color_fill)

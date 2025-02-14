@@ -1,40 +1,129 @@
 // This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
 // © kruskakli
 //@version=6
-// @description A dynamic industry sector performance comparison indicator that helps traders and investors
-// track relative strength across different market sectors in real-time.
+// @description Industry Sector Performance Analyzer
 //
-// Features:
-// - Compares up to 5 industry sector ETFs against a benchmark index (default: SPY)
-// - Displays key metrics including:
-//   * Current price
-//   * Performance % over selected timeframe
-//   * Relative performance vs benchmark
-//   * Trend direction (▲ up, ▼ down, − neutral)
-//   * Volume in millions (M) of shares traded
-// - Configurable timeframes: 1D, 1W, 1M, 3M, and YTD comparisons
-// - Color-coded performance indicators (green for outperformance, red for underperformance)
-// - Customizable table position and text size for optimal chart placement
+// PURPOSE:
+// This indicator provides real-time analysis of major industry sectors' performance relative to the broader market,
+// helping traders and investors identify sector rotation, market leadership, and potential trading opportunities.
 //
-// Default Configuration:
-// - Benchmark: SPY (S&P 500 ETF)
-// - Industry Indices: XLK (Technology), XLF (Financials), XLE (Energy), XLV (Healthcare), XLI (Industrials)
-// - Timeframe: 1M (Monthly comparison)
+// KEY FEATURES:
+// 1. Comprehensive Sector Coverage:
+//    - Tracks 11 major S&P 500 sector ETFs: Technology (XLK), Financials (XLF), Energy (XLE), Healthcare (XLV),
+//      Industrials (XLI), Basic Materials (XLB), Consumer Staples (XLP), Consumer Discretionary (XLY),
+//      Real Estate (XLRE), Utilities (XLU), and Telecommunications (XLC)
+//    - Compares each sector against a benchmark index (default: SPY)
 //
-// The indicator helps identify:
-// 1. Sector rotation patterns through relative performance
-// 2. Leading and lagging sectors vs the broader market
-// 3. Volume trends across different sectors
-// 4. Sector-specific momentum through trend indicators
+// 2. Performance Metrics:
+//    - Current Price: Real-time price for each sector ETF
+//    - Performance %: Price change over selected timeframe (1D/1W/1M/3M)
+//    - Relative Strength: Sector performance vs benchmark (outperform/underperform)
+//    - Trend Indicator: Visual markers (▲ up, ▼ down, − neutral)
+//    - Volume Analysis: Trading volume in millions of shares
 //
-// Usage:
-// - Monitor sector performance relative to the market benchmark
-// - Identify strong sectors for potential long positions
-// - Spot weak sectors for potential short positions or sector rotation
-// - Track volume patterns for confirmation of sector moves
+// 3. Visual Features:
+//    - Color-coded performance (Green = outperform, Red = underperform)
+//    - Customizable table position (4 corner options)
+//    - Adjustable text size (Tiny/Small/Normal)
+//    - Clean, organized data presentation
 //
-// Note: Performance calculations are based on price change over the selected timeframe,
-// with relative performance measured against the benchmark index.
+// REFERENCES & THEORY:
+// 1. Market Trend Analysis:
+//    - Dow Theory (Charles Dow): Markets move in trends; primary, secondary, and minor
+//    - Reference: "Technical Analysis of Stock Trends" by Robert D. Edwards and John Magee
+//    - Link: https://www.investopedia.com/terms/d/dowtheory.asp
+//
+// 2. Sector Rotation Model:
+//    - Sam Stovall's Sector Rotation: Sectors move in predictable patterns through economic cycles
+//    - Reference: "Standard & Poor's Guide to Sector Investing" by Sam Stovall
+//    - Economic Cycle Stages:
+//      * Early Recession: Consumer Staples, Utilities, Healthcare
+//      * Full Recession: Consumer Staples, Utilities
+//      * Early Recovery: Technology, Basic Materials, Industrials
+//      * Full Recovery: Energy, Materials, Industrials
+//    - Link: https://www.investopedia.com/articles/trading/05/020305.asp
+//
+// 3. Relative Strength Theory:
+//    - Developed by J. Welles Wilder Jr.
+//    - Reference: "New Concepts in Technical Trading Systems"
+//    - Principle: Strong sectors tend to stay strong; momentum persists
+//    - Link: https://www.investopedia.com/terms/r/relativestrength.asp
+//
+// 4. Volume Analysis:
+//    - Richard Wyckoff's Market Theory
+//    - Reference: "Studies in Tape Reading" by Richard D. Wyckoff
+//    - Importance of volume confirmation in trend analysis
+//    - Link: https://www.investopedia.com/articles/active-trading/070715/making-money-wyckoff-way.asp
+//
+// 5. Modern Applications:
+//    - "Intermarket Analysis" by John J. Murphy
+//    - "Trading with Intermarket Analysis" by John J. Murphy
+//    - Explains relationships between different market sectors
+//    - Link: https://www.investopedia.com/terms/i/intermarket-analysis.asp
+//
+// HOW IT WORKS:
+// 1. Data Collection:
+//    - Fetches real-time price and volume data for each sector ETF
+//    - Calculates performance over user-selected timeframe
+//    - Computes relative performance against benchmark
+//
+// 2. Analysis:
+//    - Determines sector trends based on price movement
+//    - Identifies outperforming/underperforming sectors
+//    - Monitors volume patterns for confirmation
+//
+// 3. Display:
+//    - Organizes data in an easy-to-read table format
+//    - Updates continuously during market hours
+//    - Highlights important metrics through color coding
+//
+// PRACTICAL APPLICATIONS:
+// 1. Sector Rotation Strategy:
+//    - Identify which sectors are leading/lagging
+//    - Spot early signs of sector rotation
+//    - Time sector-based trades
+//
+// 2. Risk Management:
+//    - Monitor sector exposure
+//    - Identify market trends through sector performance
+//    - Validate broader market moves
+//
+// 3. Portfolio Management:
+//    - Guide sector allocation decisions
+//    - Identify potential sector opportunities
+//    - Track sector momentum
+//
+// USAGE INSTRUCTIONS:
+// 1. Setup:
+//    - Add indicator to your chart
+//    - Select preferred benchmark (default: SPY)
+//    - Choose comparison timeframe (1D/1W/1M/3M)
+//    - Adjust table position and text size if needed
+//
+// 2. Analysis:
+//    - Green/Red colors show outperformance/underperformance
+//    - Use trend arrows for quick direction reference
+//    - Compare volume patterns with price movement
+//    - Monitor relative performance vs benchmark
+//
+// 3. Trading Applications:
+//    - Long opportunities: Focus on outperforming sectors
+//    - Short opportunities: Consider underperforming sectors
+//    - Pair trades: Compare related sectors
+//    - Sector rotation: Track performance shifts
+//
+// CUSTOMIZATION OPTIONS:
+// - Benchmark Selection: Choose any market index
+// - Timeframe: Select from 1D, 1W, 1M, or 3M comparisons
+// - Visual Settings: Adjust table position, text size, and colors
+// - Sector Names: Customize display names for each sector
+//
+// This indicator is ideal for traders and investors who want to:
+// - Make informed sector-based trading decisions
+// - Understand market dynamics through sector analysis
+// - Implement sector rotation strategies
+// - Monitor sector-specific opportunities
+// - Validate broader market trends
 
 indicator("Industry Indices Comparison", overlay=true)
 
@@ -55,6 +144,11 @@ index3Symbol = input.symbol("XLE", "Energy Index", group="Index Selection")
 index4Symbol = input.symbol("XLV", "Healthcare Index", group="Index Selection")
 index5Symbol = input.symbol("XLI", "Industrials Index", group="Index Selection")
 index6Symbol = input.symbol("XLB", "Materials Index", group="Index Selection")
+index7Symbol = input.symbol("XLP", "Consumer Staples Index", group="Index Selection")
+index8Symbol = input.symbol("XLY", "Consumer Discretionary Index", group="Index Selection")
+index9Symbol = input.symbol("XLRE", "Real Estate Index", group="Index Selection")
+index10Symbol = input.symbol("XLU", "Utilities Index", group="Index Selection")
+index11Symbol = input.symbol("XLC", "Telecommunications Index", group="Index Selection")
 
 // Industry names
 index1Name = input.string("Technology", "Technology Name", group="Industry Names")
@@ -63,6 +157,11 @@ index3Name = input.string("Energy", "Energy Name", group="Industry Names")
 index4Name = input.string("Healthcare", "Healthcare Name", group="Industry Names")
 index5Name = input.string("Industrials", "Industrials Name", group="Industry Names")
 index6Name = input.string("Materials", "Materials Name", group="Industry Names")
+index7Name = input.string("Consumer Staples", "Consumer Staples Name", group="Industry Names")
+index8Name = input.string("Consumer Discretionary", "Consumer Discretionary Name", group="Industry Names")
+index9Name = input.string("Real Estate", "Real Estate Name", group="Industry Names")
+index10Name = input.string("Utilities", "Utilities Name", group="Industry Names")
+index11Name = input.string("Telecommunications", "Telecommunications Name", group="Industry Names")
 
 // Timeframe selection
 timeframeInput = input.string("1M", "Comparison Timeframe", options=["1D", "1W", "1M", "3M"], group="Settings")
@@ -98,6 +197,11 @@ var index3Perf = 0.0
 var index4Perf = 0.0
 var index5Perf = 0.0
 var index6Perf = 0.0
+var index7Perf = 0.0
+var index8Perf = 0.0
+var index9Perf = 0.0
+var index10Perf = 0.0
+var index11Perf = 0.0
 
 if barstate.islast
     benchmarkPerf := getPerformance(benchmarkSymbol)
@@ -107,6 +211,11 @@ if barstate.islast
     index4Perf := getPerformance(index4Symbol)
     index5Perf := getPerformance(index5Symbol)
     index6Perf := getPerformance(index6Symbol)
+    index7Perf := getPerformance(index7Symbol)
+    index8Perf := getPerformance(index8Symbol)
+    index9Perf := getPerformance(index9Symbol)
+    index10Perf := getPerformance(index10Symbol)
+    index11Perf := getPerformance(index11Symbol)
 
 // Calculate relative performances
 relativePerf1 = index1Perf - benchmarkPerf
@@ -115,6 +224,11 @@ relativePerf3 = index3Perf - benchmarkPerf
 relativePerf4 = index4Perf - benchmarkPerf
 relativePerf5 = index5Perf - benchmarkPerf
 relativePerf6 = index6Perf - benchmarkPerf
+relativePerf7 = index7Perf - benchmarkPerf
+relativePerf8 = index8Perf - benchmarkPerf
+relativePerf9 = index9Perf - benchmarkPerf
+relativePerf10 = index10Perf - benchmarkPerf
+relativePerf11 = index11Perf - benchmarkPerf
 
 // Format numbers
 formatPerf(value) =>
@@ -136,7 +250,7 @@ var txtSize = switch textSize
     => size.small
 
 // Create and populate table
-var table perfTable = table.new(tablePos, 6, 8, border_width=1)
+var table perfTable = table.new(tablePos, 6, 13, border_width=1)
 
 // Function to determine trend
 getTrendSymbol(perf) =>
@@ -181,4 +295,8 @@ if barstate.islast
     addIndexRow(index4Symbol, index4Name, index4Perf, relativePerf4, 5)
     addIndexRow(index5Symbol, index5Name, index5Perf, relativePerf5, 6)
     addIndexRow(index6Symbol, index6Name, index6Perf, relativePerf6, 7)
-    
+    addIndexRow(index7Symbol, index7Name, index7Perf, relativePerf7, 8)
+    addIndexRow(index8Symbol, index8Name, index8Perf, relativePerf8, 9)
+    addIndexRow(index9Symbol, index9Name, index9Perf, relativePerf9, 10)
+    addIndexRow(index10Symbol, index10Name, index10Perf, relativePerf10, 11)
+    addIndexRow(index11Symbol, index11Name, index11Perf, relativePerf11, 12)
