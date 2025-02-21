@@ -1,0 +1,119 @@
+//@version=5
+indicator("Data Panel", overlay=true)
+
+// Input parameters
+var float dcr_benchmark = input.float(50, "DCR Benchmark %", minval=0, maxval=100, step=1)
+var float wcr_benchmark = input.float(50, "WCR Benchmark %", minval=0, maxval=100, step=1)
+tablePosition = input.string("Top Right", "Table Position", options=["Top Right", "Top Left", "Bottom Right", "Bottom Left"], group="Appearance")
+
+// Colors
+var color GREEN_COLOR = #00897B
+var color RED_COLOR = #FF5252
+var color BLUE_COLOR = #2962FF
+
+// Calculate Daily Closing Range
+calcDCR() =>
+    float dcr = 0.0
+    dcr := high != low ? ((close - low) / (high - low)) * 100 : 0
+    dcr
+
+// Calculate Weekly Closing Range
+calcWCR() =>
+    var float wcr = 0.0
+    if timeframe.isweekly
+        wcr := high != low ? ((close - low) / (high - low)) * 100 : 0
+    wcr
+
+// Get formatted value with color
+getFormattedValue(value, isPercentage = false) =>
+    if na(value)
+        ["-", color.gray]
+    else
+        valueStr = isPercentage ? str.tostring(value, "#.##") + "%" : str.tostring(value, "#.##")
+        valueColor = value > 0 ? GREEN_COLOR : value < 0 ? RED_COLOR : color.gray
+        [valueStr, valueColor]
+
+// Format large numbers
+formatNumber(num) =>
+    string result = ""
+    if na(num)
+        result := "-"
+    else if math.abs(num) >= 1000000000
+        result := str.tostring(num / 1000000000, "#.##") + "B"
+    else if math.abs(num) >= 1000000
+        result := str.tostring(num / 1000000, "#.##") + "M"
+    else
+        result := str.tostring(num, "#.##")
+    result
+
+// Calculate percentage change
+calcPercentChange(current, previous) =>
+    float change = 0.0
+    if not na(current) and not na(previous) and previous != 0
+        change := ((current - previous) / math.abs(previous)) * 100
+    change
+
+// Table position
+var tablePos = switch tablePosition
+    "Top Right" => position.top_right
+    "Top Left" => position.top_left
+    "Bottom Right" => position.bottom_right
+    "Bottom Left" => position.bottom_left
+    => position.top_right
+
+// Create and update table
+var table dataPanel = table.new(tablePos, 7, 6, border_width=1)
+
+// Get quarterly data
+eps = request.financial(syminfo.tickerid, "EARNINGS_PER_SHARE_BASIC", "FQ", barmerge.gaps_off)
+sales = request.financial(syminfo.tickerid, "TOTAL_REVENUE", "FQ", barmerge.gaps_off)
+net_income = request.financial(syminfo.tickerid, "NET_INCOME", "FQ", barmerge.gaps_off)
+total_equity = request.financial(syminfo.tickerid, "TOTAL_EQUITY", "FQ", barmerge.gaps_off)
+
+// Update table on each bar
+if barstate.islast
+    // Calculate indicators
+    dcr = calcDCR()
+    wcr = calcWCR()
+    
+    // Clear table
+    table.clear(dataPanel, 0, 0, 6, 5)
+    
+    // Headers
+    table.cell(dataPanel, 0, 0, "Reported", bgcolor=BLUE_COLOR, text_color=color.white)
+    table.cell(dataPanel, 1, 0, "EPS ($)", bgcolor=BLUE_COLOR, text_color=color.white)
+    table.cell(dataPanel, 2, 0, "% Chg", bgcolor=BLUE_COLOR, text_color=color.white)
+    table.cell(dataPanel, 3, 0, "Sales ($)", bgcolor=BLUE_COLOR, text_color=color.white)
+    table.cell(dataPanel, 4, 0, "% Chg", bgcolor=BLUE_COLOR, text_color=color.white)
+    table.cell(dataPanel, 5, 0, "ROE", bgcolor=BLUE_COLOR, text_color=color.white)
+
+    // Data rows
+    for i = 0 to 4
+        current_eps = eps[i]
+        prev_eps = eps[i + 1]
+        current_sales = sales[i]
+        prev_sales = sales[i + 1]
+        
+        // Calculate ROE (Net Income / Total Equity)
+        current_roe = net_income[i] / total_equity[i] * 100
+        
+        eps_change = calcPercentChange(current_eps, prev_eps)
+        sales_change = calcPercentChange(current_sales, prev_sales)
+        
+        [eps_str, eps_color] = getFormattedValue(current_eps)
+        [eps_change_str, eps_change_color] = getFormattedValue(eps_change, true)
+        [sales_str, sales_color] = getFormattedValue(current_sales)
+        [sales_change_str, sales_change_color] = getFormattedValue(sales_change, true)
+        [roe_str, roe_color] = getFormattedValue(current_roe, true)
+        
+        table.cell(dataPanel, 0, i + 1, "Q" + str.tostring(4 - i))
+        table.cell(dataPanel, 1, i + 1, eps_str, text_color=eps_color)
+        table.cell(dataPanel, 2, i + 1, eps_change_str, text_color=eps_change_color)
+        table.cell(dataPanel, 3, i + 1, formatNumber(current_sales), text_color=sales_color)
+        table.cell(dataPanel, 4, i + 1, sales_change_str, text_color=sales_change_color)
+        table.cell(dataPanel, 5, i + 1, roe_str, text_color=roe_color)
+
+// Add disclaimer
+var label disclaimer = label.new(bar_index, high, "TradingView data for EPS & Sales can be highly inaccurate in some cases.", 
+     color=color.gray, style=label.style_label_down, textcolor=color.gray)
+label.delete(disclaimer[1])

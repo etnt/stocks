@@ -142,6 +142,7 @@ plotDMA5 = isIntraday and plotD5 ? true : false
 plot65 = input(defval=true, title="Plot EMA65", group="Intraday Moving Averages")
 plotEMA65 = plot65 and isIntraday
 
+
 //
 // Calculate MA10 and MA40 for the Weekly timeframe.
 //
@@ -159,6 +160,7 @@ plotWMA40 = isWeekly and plotW40 ? true : false
 // Plot the Moving Averages
 //
 plot(series=plotDMA5 ? DMA5 : na,   linewidth=1, color=color.green,  title="DMA5",   style=plot.style_line)
+plot(series=plotVWMA ? VWMA : na,   linewidth=1, color=color.blue,   title="VWMA",    style=plot.style_line)
 plot(series=plotMA5 ? MA5 : na,     linewidth=1, color=slategray1,   title="MA5",    style=plot.style_line)
 plot(series=plotMA10 ? MA10 : na,   linewidth=1, color=color.blue,   title="MA10",   style=plot.style_line)
 plot(series=plotMA20 ? MA20 : na,   linewidth=1, color=color.yellow, title="MA20",   style=plot.style_line)

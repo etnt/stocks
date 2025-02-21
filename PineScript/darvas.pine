@@ -1,0 +1,48 @@
+//
+//author KıvanÇ @fr3762 on twitter
+//creator Nicholas Darvas
+//
+//@version=6
+study("DARVAS BOX - Last Box Only", overlay=true, shorttitle="DARVAS")
+
+boxp = input.int(5, "BOX LENGTH", minval=1)
+
+// Variables to track the last box's data
+var float lastTopBox = na
+var float lastBottomBox = na
+var int lastBoxStartTime = na
+
+LL = ta.lowest(low, boxp)
+k1 = ta.highest(high, boxp)
+k2 = ta.highest(high, boxp - 1)
+k3 = ta.highest(high, boxp - 2)
+
+NH = ta.valuewhen(high > k1[1], high, 0)
+box1 = k3 < k2
+
+// Check for a new box formation
+if barssince(high > k1[1]) == boxp - 2 and box1 and NH != 0
+    lastTopBox := NH
+    lastBottomBox := LL
+    lastBoxStartTime := bar_index
+
+// Plot only the last box
+plotshape(lastTopBox, style=shape.triangleup, location=location.abovebar, color=color.green, size=size.small, title="Top Box")
+plotshape(lastBottomBox, style=shape.triangledown, location=location.belowbar, color=color.red, size=size.small, title="Bottom Box")
+
+
+//Optional:  Visualize the box duration (for debugging/understanding)  -  requires adjustment for v6
+//var line topLine = line.new(na, na, na, na)
+//var line bottomLine = line.new(na, na, na, na)
+
+//if not na(lastBoxStartTime)
+//    line.set_x1(topLine, lastBoxStartTime - boxp + 1)
+//    line.set_x2(topLine, lastBoxStartTime)
+//    line.set_y1(topLine, lastBottomBox)
+//    line.set_y2(topLine, lastTopBox)
+    
+//    line.set_x1(bottomLine, lastBoxStartTime - boxp + 1)
+//    line.set_x2(bottomLine, lastBoxStartTime)
+//    line.set_y1(bottomLine, lastBottomBox)
+//    line.set_y2(bottomLine, lastBottomBox)
+

@@ -1,0 +1,125 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//
+// To quote @qullamaggie: " High ADR is Gold, low ADR is shit..."
+// Hence we display the ADR (Average Daily Range) in percent.
+//
+// We also calculates the Trend Template as described by Mark Minervini in his book: "Trade like a stock market wizard"
+// For a stock to be considered all the rules has to be fullfilled.
+// The only rule this indicator doesn't implement is the IBD Relative Strength ranking.
+//
+// Rules:
+//  close > MA-50 > MA-150 > MA-200 , each condition that is true gets one point.
+//  The current stock price is at least 30 percent above its 52-week low, gets one point
+//  The current stock price is within at least 25 percent of its 52-week high, gets one point.
+//  The 200-day moving average line is trending up for at least 1 month (preferably 4–5 months), gets one point.
+//
+// When we get 6 points, all the rules are fullfilled and we display an OK;
+// else we show the number of points (X).
+//
+// We also display the percentage change of two selected Indices.
+//
+//@version=6
+indicator("ADR label", overlay=true)
+
+// Change in percent
+cpt(_x, _x1) =>
+    _cpt = ((_x / _x1) - 1)
+    _cpt
+
+
+ix = input.symbol(defval="OMXSPI", title="Index")
+ix_open = request.security(syminfo.tickerid, timeframe.period, open)
+ix_close = request.security(syminfo.tickerid, "5M", close)
+ix_change = math.round(cpt(ix_close, ix_open), 2)
+
+
+// User selectable colors.
+text_col = input(defval=color.yellow, title="Table Color" )
+value_col = input(defval=color.white, title="Value Color" )
+bad_col = input(defval=color.red, title="Bad Value Color")
+
+text_sz = size.small
+
+src = close
+
+
+//
+// TREND TEMPLATE calculation
+//
+ma50 = ta.sma(src, 50)
+ma150 = ta.sma(src, 150)
+ma200 = ta.sma(src, 200)
+
+week = request.security(syminfo.tickerid, "W", close)
+week52low = ta.lowest(week, 52)
+week52high = ta.highest(week, 52)
+
+float monotonic = na
+monotonic := (ma200[0] > ma200[1]) ? 1 :0
+
+int tq = 0
+tq_gt(_s1, _s2, _tq) =>
+    if (_s1 > _s2)
+        _tq + 1
+    else
+        _tq - 1
+
+// Rule 1,2,4,5
+tq := tq_gt(src, ma50,  tq)
+tq := tq_gt(ma50,  ma150, tq)
+tq := tq_gt(ma150, ma200, tq)
+// Rule 3 (using 50 days, i.e 10 weeks or 2.5 months)
+tq := (math.sum(monotonic, 50) == 50) ? tq + 1 : tq
+// Rule 6
+tq := (src * 1.3) > week52low ? tq + 1 : tq
+// Rule 7
+tq := src > (week52high * 0.75) ? tq + 1 : tq
+
+// Construct the TrendTemplate string
+//TTstr = tq == 6 ? "TT:OK" : "TT(" + tostring(tq, "#") + ")"
+TTstr = tq == 6 ? "OK" : str.tostring(tq, "#")
+TTstrColor = tq == 6 ? value_col : bad_col
+
+// 
+// ADR% calculation
+//
+// Original: alpine_trader
+// Amended 08/12/20 by TheScrutiniser, MikeC on advise from GlinckEastwoot
+Length = input(20, title="ADR length")
+dhigh = request.security(syminfo.tickerid, 'D', high)
+dlow  = request.security(syminfo.tickerid, 'D', low)
+// formula amended, thanks to GlinckEastwoot
+ADR = 100 * (ta.sma(dhigh/dlow, Length) - 1)
+ADRstr = str.tostring(math.round(ADR,2)) + "%"
+
+
+//
+// Construct the Table
+//
+tabLoc = input.string(title="Table Location", defval="Upper Right", options=["Upper Right","Middle Right","Lower Right"])
+tabPos = (tabLoc == "Upper Right") ? position.top_right : (tabLoc == "Middle Right") ? position.middle_right : position.bottom_right
+
+table t = table.new(tabPos, 4, 4)
+if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
+    table.cell(t, 0, 0, "", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+
+    table.cell(t, 0, 1, ix, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
+    table.cell(t, 1, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 1, str.tostring(ix_change) + "%", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.merge_cells(t, 0, 1, 2, 1)
+
+    table.cell(t, 0, 2, "ADR%:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 2, ADRstr, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 2, "TT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 2, TTstr, text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+
+    table.cell(t, 0, 3, syminfo.sector, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
+    table.cell(t, 1, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+    table.merge_cells(t, 0, 3, 3, 3)

@@ -1,0 +1,258 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © kruskakli
+//
+// The indicator displays:
+//
+// 1. The key Moving Averages, displayed depending on the timeframe used.
+//
+// 2. Average Period Range Table, containing:
+//    - An index
+//    - The change in the index
+//    - The Trend Template
+//    - The APR% (The Average Period Range in Percent)
+//    - The Sector of the current Stock
+//
+// 3. Candlestick Patterns (some favorites)
+//    - Evening Star
+//    - Morning Star
+//    - Shooting Star
+//    - Hammer
+//    - Gravestone
+//
+// 4. Minervinis Trend Template
+//    A 'TT:OK' is displayed in the upper right corner of the chart.
+//    This indicates that the current trend is strong and taking long positions is a good strategy.
+//
+//@version=6
+indicator("My Indicator", shorttitle="X", overlay=true)
+
+src = close
+
+kaki1 = color.new(#fff68f, 0)
+blue2 = color.new(#9999ff, 0)
+gray2 = color.new(color.gray, 85)
+gray3 = color.new(color.gray, 60)
+slategray1 = color.new(#c6e2ff, 0)
+
+//
+// What is the Timeframe?
+//
+dayInMinutes = 24 * 60
+isHourly = timeframe.period == "60"
+isDaily = timeframe.period == "1D"
+isWeekly = timeframe.period == "1W"
+isIntraHourly = timeframe.multiplier < 60 and (not isDaily) and (not isWeekly)
+isIntraday = (timeframe.multiplier < dayInMinutes) and (not isIntraHourly) and (not isDaily) and (not isWeekly)
+
+//
+// Plot the Moving Averages
+//
+plot5 = input(defval=false,  title="Plot MA5",    group="Daily Moving Averages")
+plot10 = input(defval=false, title="Plot MA10",  group="Daily Moving Averages")
+plot20 = input(defval=true,  title="Plot EMA21",  group="Daily Moving Averages")
+plot50 = input(defval=true,  title="Plot MA50",   group="Daily Moving Averages")
+plot200 = input(defval=true, title="Plot MA200", group="Daily Moving Averages")
+
+plotMA5 = plot5 and isDaily
+plotMA10 = plot10 and isDaily
+plotMA20 = plot20 and isDaily
+plotMA50 = plot50 and isDaily
+plotMA200 = plot200 and isDaily
+
+MA5 = ta.sma(src, 5)
+MA10 = ta.sma(src, 10)
+MA20 = ta.ema(src, 21)
+MA50 = ta.sma(src, 50)
+EMA65 = ta.ema(src, 65)
+MA200 = ta.sma(src, 200)
+
+//
+// Calculate Moving Averages for intraday timeframes.
+//
+
+// DMA5 gives the overall trend
+openHours = input(defval=6.5, title="Open: Hours a Day")
+plotD5 = input(defval=true, title="Plot DMA5", group="Intraday Moving Averages")
+dayMinutes = math.round(openHours * 60)
+intraDayLength = 5
+dminutes = intraDayLength * dayMinutes
+dlen = dminutes / timeframe.multiplier
+DMA5 = ta.sma(close, dlen)
+plotDMA5 = isIntraHourly and plotD5
+
+// Maybe plot EMA65 on Intraday?
+plot65 = input(defval=true, title="Plot EMA65", group="Intraday Moving Averages")
+plotEMA65 = plot65 and isIntraday
+
+// Maybe plot VWMA on Intraday
+plot_VWMA = input(defval=true, title="Plot VWMA", group="Intraday Moving Averages")
+len = input.int(defval=21, title="VWMA Length", group="Intraday Moving Averages")
+plotVWMA = plot_VWMA and (isIntraHourly or isHourly) and (not isWeekly)
+VWMA = ta.vwma(hlc3, len)
+
+//
+// Calculate MA10 and MA40 for the Weekly timeframe.
+//
+plotW10 = input(defval=true, title="Plot short Weekly MA", group="Weekly Moving Averages")
+plotW40 = input(defval=true, title="Plot long Weekly MA", group="Weekly Moving Averages")
+shortWeeklyMA = input.int(defval=10, title="Short Weekly MA", group="Weekly Moving Averages")
+longWeeklyMA = input.int(defval=30, title="Long Weekly MA", group="Weekly Moving Averages")
+weekly = request.security(syminfo.tickerid, 'W', close)
+WMA10 = ta.sma(weekly, shortWeeklyMA)
+WMA40 = ta.sma(weekly, longWeeklyMA)
+plotWMA10 = isWeekly and plotW10
+plotWMA40 = isWeekly and plotW40
+
+//
+// Plot the Moving Averages
+//
+plot(series=plotDMA5 ? DMA5 : na,   linewidth=1, color=color.green,  title="DMA5",   style=plot.style_circles)
+plot(series=plotVWMA ? VWMA : na,   linewidth=1, color=color.blue,   title="VWMA",    style=plot.style_line)
+plot(series=plotMA5 ? MA5 : na,     linewidth=1, color=slategray1,   title="MA5",    style=plot.style_line)
+plot(series=plotMA10 ? MA10 : na,   linewidth=1, color=color.blue,   title="MA10",   style=plot.style_line)
+plot(series=plotMA20 ? MA20 : na,   linewidth=1, color=color.yellow, title="MA20",   style=plot.style_line)
+plot(series=plotMA50 ? MA50 : na,   linewidth=1, color=color.green,  title="MA50",   style=plot.style_cross)
+plot(series=plotMA200 ? MA200 : na, linewidth=1, color=color.white,     title="MA200",  style=plot.style_circles)
+plot(series=plotEMA65 ? EMA65 : na, linewidth=1, color=color.purple, title="EMA65",  style=plot.style_circles)
+plot(series=plotWMA10 ? WMA10 : na, linewidth=1, color=color.teal,   title="WMA10",  style=plot.style_line)
+plot(series=plotWMA40 ? WMA40 : na, linewidth=1, color=color.fuchsia,title="WMA40",  style=plot.style_circles)
+
+
+//
+// AVERAGE PERIOD RANGE LABEL
+//
+
+// Change in percent
+cpt(_x, _x1) =>
+    _cpt = ((_x / _x1) - 1)
+    _cpt
+
+
+ix = input.symbol(defval="OMXSPI", title="Index")
+ix_open = request.security(syminfo.tickerid, timeframe.period, open)
+ix_close = request.security(syminfo.tickerid, "5M", close)
+ix_change = math.round(cpt(ix_close, ix_open), 2)
+
+
+// User selectable colors.
+text_col = input(defval=color.yellow, title="Table Color" )
+value_col = input(defval=color.white, title="Value Color" )
+bad_col = input(defval=color.red, title="Bad Value Color")
+
+text_sz = size.small
+
+//
+// TREND TEMPLATE calculation
+//
+ma50 = ta.sma(src, 50)
+ma150 = ta.sma(src, 150)
+ma200 = ta.sma(src, 200)
+
+week = request.security(syminfo.tickerid, "W", close)
+week52low = ta.lowest(week, 52)
+week52high = ta.highest(week, 52)
+
+float monotonic = na
+monotonic := (ma200[0] > ma200[1]) ? 1 :0
+
+int tq = 0
+tq_gt(_s1, _s2, _tq) =>
+    if (_s1 > _s2)
+        _tq + 1
+    else
+        _tq - 1
+
+// Rule 1,2,4,5
+tq := tq_gt(src, ma50,  tq)
+tq := tq_gt(ma50,  ma150, tq)
+tq := tq_gt(ma150, ma200, tq)
+// Rule 3 (using 50 days, i.e 10 weeks or 2.5 months)
+tq := (math.sum(monotonic, 50) == 50) ? tq + 1 : tq
+// Rule 6
+tq := (src * 1.3) > week52low ? tq + 1 : tq
+// Rule 7
+tq := src > (week52high * 0.75) ? tq + 1 : tq
+
+// Construct the TrendTemplate string
+//TTstr = tq == 6 ? "TT:OK" : "TT(" + tostring(tq, "#") + ")"
+TTstr = tq == 6 ? "OK" : str.tostring(tq, "#")
+TTstrColor = tq == 6 ? value_col : bad_col
+
+// 
+// ADR% calculation
+//
+// Original: alpine_trader
+// Amended 08/12/20 by TheScrutiniser, MikeC on advise from GlinckEastwoot
+Length = input(20, title="ADR length")
+dhigh = request.security(syminfo.tickerid, 'D', high)
+dlow  = request.security(syminfo.tickerid, 'D', low)
+// formula amended, thanks to GlinckEastwoot
+ADR = 100 * (ta.sma(dhigh/dlow, Length) - 1)
+ADRstr = str.tostring(math.round(ADR,2)) + "%"
+
+
+//
+// Construct the Table
+//
+tabLoc = input.string(title="Table Location", defval="Upper Right", options=["Upper Right","Middle Right","Lower Right"])
+tabPos = (tabLoc == "Upper Right") ? position.top_right : (tabLoc == "Middle Right") ? position.middle_right : position.bottom_right
+
+table t = table.new(tabPos, 4, 4)
+if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
+    table.cell(t, 0, 0, "", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+
+    table.cell(t, 0, 1, ix, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
+    table.cell(t, 1, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 1, str.tostring(ix_change) + "%", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.merge_cells(t, 0, 1, 2, 1)
+
+    table.cell(t, 0, 2, "ADR%:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 2, ADRstr, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 2, "TT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 2, TTstr, text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+
+    table.cell(t, 0, 3, syminfo.sector, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
+    table.cell(t, 1, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+    table.merge_cells(t, 0, 3, 3, 3)
+
+
+
+
+
+//
+// Candlestick patterns
+//
+plotCandlesticks = input(defval=true, title="Plot Candlestick Patterns", group="Candlestick Patterns")
+plotEveningStar = input(defval=true, title="Plot Evening Star", group="Candlestick Patterns")
+plotMorningStar = input(defval=true, title="Plot Morning Star", group="Candlestick Patterns")
+plotShootingStar = input(defval=true, title="Plot Shooting Star", group="Candlestick Patterns")
+plotHammer = input(defval=true, title="Plot Hammer", group="Candlestick Patterns")
+plotGravestone = input(defval=true, title="Plot Gravestone", group="Candlestick Patterns")
+
+// Candlestick Patterns
+isEveningStar=(close[2] > open[2] and math.min(open[1], close[1]) > close[2] and open < math.min(open[1], close[1]) and close < open )
+
+isMorningStar=(close[2] < open[2] and math.max(open[1], close[1]) < close[2] and open > math.max(open[1], close[1]) and close > open )
+
+isShootingStar=(open[1] < close[1] and open > close[1] and high - math.max(open, close) >= math.abs(open - close) * 3 and math.min(close, open) - low <= math.abs(open - close))
+
+isHammer=((open[1]>close) and (low<low[1]) and ((high - low)>3*(open -close)) and  ((close - low)/(.001 + high - low) > 0.6) and ((open - low)/(.001 + high - low) > 0.6))
+
+isGravestone=(close<math.min(open[1],close[1]) and ((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.9) and ((high - open)/(.001 + high - low) > 0.9))
+
+// Plotting
+plotshape(plotEveningStar and isEveningStar, title = "Evening Star", color = color.red, style = shape.arrowdown, text = "Evening\nStar", textcolor = color.red, size = size.normal, location = location.abovebar)
+
+plotshape(plotMorningStar and isMorningStar, title = "Morning Star", color = color.lime, style = shape.arrowup, text = "Morning\nStar", textcolor = color.lime, size = size.normal, location = location.belowbar)
+
+plotshape(plotShootingStar and isShootingStar, title= "Shooting Star", color=color.red, style=shape.arrowdown, textcolor = color.red, size = size.normal, text="Shooting\nStar")
+
+plotshape(plotHammer and isHammer, title= "Hammer", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="H")
+
+plotshape(plotGravestone and isGravestone, title= "Gravestone", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="G")
