@@ -1,6 +1,19 @@
 // This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
 // © kruskakli
 //
+// Portfolio Tracker
+// This indicator allows you to track up to 10 stocks in your portfolio by displaying:
+// - Entry price for each position
+// - Current price for each position
+// - Percentage change from entry
+// 
+// Features:
+// - Support for up to 10 different symbols
+// - Color-coded percentage changes (green for positive, red for negative)
+// - Configurable table position (Upper Right, Middle Right, Lower Right)
+// - Easy input of symbols and their entry prices
+// - Real-time price tracking and percentage change calculations
+//
 //@version=6
 indicator("Portfolio Tracker", overlay=true)
 
@@ -15,7 +28,7 @@ var header_color = color.new(color.yellow, 0)
 var text_color = color.new(color.white, 0)
 
 
-// Input for portfolio positions - 5 stocks
+// Input for portfolio positions - 10 stocks
 sym1 = input.symbol("", "Stock 1 Symbol", confirm=true)
 var float price1 = input.float(0.0, "Stock 1 Buy Price", minval=0.0)
 if (sym1 != "")
@@ -48,6 +61,25 @@ var float price6 = input.float(0.0, "Stock 6 Buy Price", minval=0.0)
 if (sym6 != "")
     rows := rows + 1
 
+sym7 = input.symbol("", "Stock 7 Symbol", confirm=true)
+var float price7 = input.float(0.0, "Stock 7 Buy Price", minval=0.0)
+if (sym7 != "")
+    rows := rows + 1
+
+sym8 = input.symbol("", "Stock 8 Symbol", confirm=true)
+var float price8 = input.float(0.0, "Stock 8 Buy Price", minval=0.0)
+if (sym8 != "")
+    rows := rows + 1
+
+sym9 = input.symbol("", "Stock 9 Symbol", confirm=true)
+var float price9 = input.float(0.0, "Stock 9 Buy Price", minval=0.0)
+if (sym9 != "")
+    rows := rows + 1
+
+sym10 = input.symbol("", "Stock 10 Symbol", confirm=true)
+var float price10 = input.float(0.0, "Stock 10 Buy Price", minval=0.0)
+if (sym10 != "")
+    rows := rows + 1
 
 
 // Function to calculate percentage change
@@ -120,3 +152,39 @@ if barstate.islast
         table.cell(t, 1, 6, str.tostring(price6, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
         table.cell(t, 2, 6, str.tostring(current6, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
         table.cell(t, 3, 6, str.tostring(pct6, "#.##") + "%", text_color=(pct6 >= 0 ? pos_color : neg_color), text_size=text_size, text_halign=text.align_right)
+
+    // Stock 7
+    if str.length(sym7) > 0 and price7 > 0
+        current7 = request.security(sym7, timeframe.period, close)
+        pct7 = calc_percent_change(current7, price7)
+        table.cell(t, 0, 7, sym7, text_color=text_color, text_size=text_size, text_halign=text.align_left)
+        table.cell(t, 1, 7, str.tostring(price7, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 2, 7, str.tostring(current7, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 3, 7, str.tostring(pct7, "#.##") + "%", text_color=(pct7 >= 0 ? pos_color : neg_color), text_size=text_size, text_halign=text.align_right)
+
+    // Stock 8
+    if str.length(sym8) > 0 and price8 > 0
+        current8 = request.security(sym8, timeframe.period, close)
+        pct8 = calc_percent_change(current8, price8)
+        table.cell(t, 0, 8, sym8, text_color=text_color, text_size=text_size, text_halign=text.align_left)
+        table.cell(t, 1, 8, str.tostring(price8, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 2, 8, str.tostring(current8, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 3, 8, str.tostring(pct8, "#.##") + "%", text_color=(pct8 >= 0 ? pos_color : neg_color), text_size=text_size, text_halign=text.align_right)
+
+    // Stock 9
+    if str.length(sym9) > 0 and price9 > 0
+        current9 = request.security(sym9, timeframe.period, close)
+        pct9 = calc_percent_change(current9, price9)
+        table.cell(t, 0, 9, sym9, text_color=text_color, text_size=text_size, text_halign=text.align_left)
+        table.cell(t, 1, 9, str.tostring(price9, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 2, 9, str.tostring(current9, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 3, 9, str.tostring(pct9, "#.##") + "%", text_color=(pct9 >= 0 ? pos_color : neg_color), text_size=text_size, text_halign=text.align_right)
+
+    // Stock 10
+    if str.length(sym10) > 0 and price10 > 0
+        current10 = request.security(sym10, timeframe.period, close)
+        pct10 = calc_percent_change(current10, price10)
+        table.cell(t, 0, 10, sym10, text_color=text_color, text_size=text_size, text_halign=text.align_left)
+        table.cell(t, 1, 10, str.tostring(price10, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 2, 10, str.tostring(current10, "#.##"), text_color=text_color, text_size=text_size, text_halign=text.align_right)
+        table.cell(t, 3, 10, str.tostring(pct10, "#.##") + "%", text_color=(pct10 >= 0 ? pos_color : neg_color), text_size=text_size, text_halign=text.align_right)
