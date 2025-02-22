@@ -233,6 +233,7 @@ plotEveningStar = input(defval=true, title="Plot Evening Star", group="Candlesti
 plotMorningStar = input(defval=true, title="Plot Morning Star", group="Candlestick Patterns")
 plotShootingStar = input(defval=true, title="Plot Shooting Star", group="Candlestick Patterns")
 plotHammer = input(defval=true, title="Plot Hammer", group="Candlestick Patterns")
+plotInvertedHammer = input(defval=true, title="Plot Inverted Hammer", group="Candlestick Patterns")
 plotGravestone = input(defval=true, title="Plot Gravestone", group="Candlestick Patterns")
 
 // Candlestick Patterns
@@ -240,19 +241,27 @@ isEveningStar=(close[2] > open[2] and math.min(open[1], close[1]) > close[2] and
 
 isMorningStar=(close[2] < open[2] and math.max(open[1], close[1]) < close[2] and open > math.max(open[1], close[1]) and close > open )
 
-isShootingStar=(open[1] < close[1] and open > close[1] and high - math.max(open, close) >= math.abs(open - close) * 3 and math.min(close, open) - low <= math.abs(open - close))
+// The inverted hammer and the shooting star look exactly the same. 
+// They both have long upper shadows and small real bodies near the low of the candle,
+// with little or no lower shadow.
+// The difference is context: A shooting star occurs after a price advance and marks a
+// potential turning point lower. An inverted hammer occurs after a price decline and 
+// marks a potential turning point higher.
+//isShootingStar=(open[1] < close[1] and open > close[1] and high - math.max(open, close) >= math.abs(open - close) * 3 and math.min(close, open) - low <= math.abs(open - close))
+isShootingStar=(open[1] < close[1] and ((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.7) and ((high - open)/(.001 + high - low) > 0.7))
+isInvertedHammer=(((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.6) and ((high - open)/(.001 + high - low) > 0.6))
 
-isHammer=((open[1]>close) and (low<low[1]) and ((high - low)>3*(open -close)) and  ((close - low)/(.001 + high - low) > 0.6) and ((open - low)/(.001 + high - low) > 0.6))
+isHammer=((open[1]>close) and (low<low[1]) and ((high - low)>3*(open -close)) and  ((close - low)/(.001 + high - low) > 0.7) and ((open - low)/(.001 + high - low) > 0.7))
 
 isGravestone=(close<math.min(open[1],close[1]) and ((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.9) and ((high - open)/(.001 + high - low) > 0.9))
 
 // Plotting
-plotshape(plotEveningStar and isEveningStar, title = "Evening Star", color = color.red, style = shape.arrowdown, text = "Evening\nStar", textcolor = color.red, size = size.normal, location = location.abovebar)
+plotshape(plotCandlesticks and plotEveningStar and isEveningStar, title = "Evening Star", color = color.red, style = shape.arrowdown, text = "Evening\nStar", textcolor = color.red, size = size.normal, location = location.abovebar)
 
-plotshape(plotMorningStar and isMorningStar, title = "Morning Star", color = color.lime, style = shape.arrowup, text = "Morning\nStar", textcolor = color.lime, size = size.normal, location = location.belowbar)
+plotshape(plotCandlesticks and plotMorningStar and isMorningStar, title = "Morning Star", color = color.lime, style = shape.arrowup, text = "Morning\nStar", textcolor = color.lime, size = size.normal, location = location.belowbar)
 
-plotshape(plotShootingStar and isShootingStar, title= "Shooting Star", color=color.red, style=shape.arrowdown, textcolor = color.red, size = size.normal, text="Shooting\nStar")
+plotshape(plotCandlesticks and plotShootingStar and isShootingStar, title= "Shooting Star", color=color.red, style=shape.arrowdown, textcolor = color.red, size = size.normal, text="Shooting\nStar")
 
-plotshape(plotHammer and isHammer, title= "Hammer", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="H")
+plotshape(plotCandlesticks and plotHammer and isHammer, title= "Hammer", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="H")
 
-plotshape(plotGravestone and isGravestone, title= "Gravestone", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="G")
+plotshape(plotCandlesticks and plotGravestone and isGravestone, title= "Gravestone", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="G")
