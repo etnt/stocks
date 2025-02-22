@@ -275,3 +275,42 @@ in a stock belonging to a currently strong sector.
 
 <img src="images/branch-index.png" width=800/>
 
+### My Indicator
+
+A comprehensive indicator that combines multiple technical analysis tools in one view.
+
+The script can be found [here](PineScript/my-indicator.pine).
+
+Features:
+* Key Moving Averages displayed based on timeframe (Daily, Weekly, Intraday)
+* Average Period Range Table showing:
+  - Index and its change
+  - Trend Template status
+  - Average Period Range percentage
+  - Stock's sector
+* Popular Candlestick Patterns including:
+  - Evening Star
+  - Morning Star
+  - Shooting Star
+  - Hammer
+  - Gravestone
+* Minervini's Trend Template implementation showing when a stock is in a strong trend
+
+### Portfolio Tracker
+
+A tool for monitoring your current trade portfolio in real-time.
+
+The script can be found [here](PineScript/portfolio-tracker.pine).
+
+<img src="images/portifolio-tracker.pine" width=800/>
+
+Features:
+* Track up to 10 different stocks simultaneously
+* For each position, displays:
+  - Entry price
+  - Current price
+  - Percentage change from entry
+* Color-coded performance indicators (green for profit, red for loss)
+* Configurable table position on the chart
+* Easy setup through TradingView's indicator settings
+
