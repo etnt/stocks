@@ -302,7 +302,7 @@ A tool for monitoring your current trade portfolio in real-time.
 
 The script can be found [here](PineScript/portfolio-tracker.pine).
 
-<img src="images/portifolio-tracker.pine" width=800/>
+<img src="images/portifolio-tracker.png" width=600/>
 
 Features:
 * Track up to 10 different stocks simultaneously
