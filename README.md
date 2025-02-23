@@ -1,6 +1,23 @@
 # Stocks
 > Things related to stocks
 
+## Contents
+- [Google Sheet, AppScript and AppSheet](#google-sheet-appscript-and-appsheet)
+  - [Create sortable columns](#create-sortable-columns)
+  - [Create a balanced stock portfolio using Google Sheet and AppScript](#create-a-balanced-stock-portfolio-using-google-sheet-and-appscript)
+  - [How to calculate the current value of your Investment Fund Shares](#how-to-calculate-the-current-value-of-your-investment-fund-shares)
+  - [Record a portfolio value once a day](#record-a-portfolio-value-once-a-day)
+  - [A Mobile App for displaying portfolio progress diagrams](#a-mobile-app-for-displaying-portfolio-progress-diagrams)
+- [TradingView](#tradingview)
+  - [KMAs - Key Moving Averages](#kmas---key-moving-averages)
+  - [Position Sizes](#position-sizes)
+  - [Quick Stats](#quick-stats)
+  - [Nice Volume - The bottom (volume) area](#nice-volume---the-bottom-volume-area)
+  - [Comparing Sectors](#comparing-sectors)
+  - [My Indicator](#my-indicator)
+  - [Portfolio Tracker](#portfolio-tracker)
+  - [Zebra Pattern](#zebra-pattern)
+
 ## Google Sheet, AppScript and AppSheet
 
 ### Create sortable columns
@@ -318,18 +335,13 @@ Features:
 ### Zebra Pattern
 
 A visual aid indicator that helps distinguish different time periods with alternating background colors.
-By adding a Zebra pattern to the background based on a higher timeframe period
-we can spot when the price breaks up/down from that higher period, which can be used
-to identify entry and exit points.
 
-The script can be found [here](PineScript/zebra-pattern.pine).
-
-<img src="images/zebra-pattern.png" width=600/>
+The script can be found [here](PineScript/zebra-week.pine).
 
 Features:
 * Automatically applies alternating background patterns based on timeframe:
   - On Daily charts: Alternates background color for even/odd weeks
   - On 15-minute charts: Alternates background color for even/odd days
-* Uses a subtle light gray color with high transparency (90%) to avoid visual clutter
+* Uses a subtle light gray color with high transparency (95%) to avoid visual clutter
 * Simple toggle to enable/disable the pattern
 * Helps visually separate different trading periods for better pattern recognition

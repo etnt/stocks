@@ -191,6 +191,13 @@ dlow  = request.security(syminfo.tickerid, 'D', low)
 ADR = 100 * (ta.sma(dhigh/dlow, Length) - 1)
 ADRstr = str.tostring(math.round(ADR,2)) + "%"
 
+// Enterprise value to EBIT ratio: "EV_EBIT"
+// Basic earnings per share: "EARNINGS_PER_SHARE_BASIC"
+// TTM = Trailing Twelve Months
+EPS = request.financial(syminfo.tickerid, "EARNINGS_PER_SHARE", "FY")
+EV_EBIT = request.financial(syminfo.tickerid, "EV_EBIT", "FY")
+EV_EBIT_STR = str.tostring(math.round(EV_EBIT))
+
 
 //
 // Construct the Table
@@ -198,33 +205,36 @@ ADRstr = str.tostring(math.round(ADR,2)) + "%"
 tabLoc = input.string(title="Table Location", defval="Upper Right", options=["Upper Right","Middle Right","Lower Right"])
 tabPos = (tabLoc == "Upper Right") ? position.top_right : (tabLoc == "Middle Right") ? position.middle_right : position.bottom_right
 
-table t = table.new(tabPos, 4, 4)
+table t = table.new(tabPos, 4, 5)
 if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
     table.cell(t, 0, 0, "", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
     table.cell(t, 1, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
     table.cell(t, 2, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
     table.cell(t, 3, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
 
-    table.cell(t, 0, 1, ix, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
+    table.cell(t, 0, 1, syminfo.sector, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
     table.cell(t, 1, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
     table.cell(t, 2, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
-    table.cell(t, 3, 1, str.tostring(ix_change) + "%", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
-    table.merge_cells(t, 0, 1, 2, 1)
+    table.cell(t, 3, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+    table.merge_cells(t, 0, 1, 3, 1)
 
-    table.cell(t, 0, 2, "ADR%:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
-    table.cell(t, 1, 2, ADRstr, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
-    table.cell(t, 2, 2, "TT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
-    table.cell(t, 3, 2, TTstr, text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
+    table.cell(t, 0, 2, ix, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
+    table.cell(t, 1, 2, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 2, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 2, str.tostring(ix_change) + "%", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
+    table.merge_cells(t, 0, 2, 2, 2)
 
-    table.cell(t, 0, 3, syminfo.sector, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
-    table.cell(t, 1, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
-    table.cell(t, 2, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
-    table.cell(t, 3, 3, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
-    table.merge_cells(t, 0, 3, 3, 3)
+    table.cell(t, 0, 3, "ADR%:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 3, ADRstr, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 3, "TT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 3, TTstr, text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
 
+    table.cell(t, 0, 4, "EPS:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 4, str.tostring(math.round(EPS[0])), text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 2, 4, "EV/EBIT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 4, EV_EBIT_STR, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
 
-
-
+    
 
 //
 // Candlestick patterns
