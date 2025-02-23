@@ -342,6 +342,8 @@ A visual aid indicator that helps distinguish different time periods with altern
 
 The script can be found [here](PineScript/zebra-week.pine).
 
+<img src="images/zebra-pattern.png" width=600/>
+
 Features:
 * Automatically applies alternating background patterns based on timeframe:
   - On Daily charts: Alternates background color for even/odd weeks
