@@ -298,6 +298,8 @@ A comprehensive indicator that combines multiple technical analysis tools in one
 
 The script can be found [here](PineScript/my-indicator.pine).
 
+<img src="images/my-indicator.png" width=800/>
+
 Features:
 * Key Moving Averages displayed based on timeframe (Daily, Weekly, Intraday)
 * Average Period Range Table showing:
@@ -305,6 +307,8 @@ Features:
   - Trend Template status
   - Average Period Range percentage
   - Stock's sector
+  - Enterprise value to EBIT ratio
+  - Earnings per share
 * Popular Candlestick Patterns including:
   - Evening Star
   - Morning Star
