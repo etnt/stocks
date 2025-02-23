@@ -293,6 +293,7 @@ Features:
   - Morning Star
   - Shooting Star
   - Hammer
+  - Inverted Hammer
   - Gravestone
 * Minervini's Trend Template implementation showing when a stock is in a strong trend
 

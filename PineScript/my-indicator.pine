@@ -17,6 +17,7 @@
 //    - Morning Star
 //    - Shooting Star
 //    - Hammer
+//    - Inverted Hammer
 //    - Gravestone
 //
 // 4. Minervinis Trend Template
@@ -249,7 +250,7 @@ isMorningStar=(close[2] < open[2] and math.max(open[1], close[1]) < close[2] and
 // marks a potential turning point higher.
 //isShootingStar=(open[1] < close[1] and open > close[1] and high - math.max(open, close) >= math.abs(open - close) * 3 and math.min(close, open) - low <= math.abs(open - close))
 isShootingStar=(open[1] < close[1] and ((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.7) and ((high - open)/(.001 + high - low) > 0.7))
-isInvertedHammer=(((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.6) and ((high - open)/(.001 + high - low) > 0.6))
+isInvertedHammer=open[1]>close[1] and (((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.7) and ((high - open)/(.001 + high - low) > 0.6))
 
 isHammer=((open[1]>close) and (low<low[1]) and ((high - low)>3*(open -close)) and  ((close - low)/(.001 + high - low) > 0.7) and ((open - low)/(.001 + high - low) > 0.7))
 
@@ -261,6 +262,7 @@ plotshape(plotCandlesticks and plotEveningStar and isEveningStar, title = "Eveni
 plotshape(plotCandlesticks and plotMorningStar and isMorningStar, title = "Morning Star", color = color.lime, style = shape.arrowup, text = "Morning\nStar", textcolor = color.lime, size = size.normal, location = location.belowbar)
 
 plotshape(plotCandlesticks and plotShootingStar and isShootingStar, title= "Shooting Star", color=color.red, style=shape.arrowdown, textcolor = color.red, size = size.normal, text="Shooting\nStar")
+plotshape(plotCandlesticks and plotInvertedHammer and isInvertedHammer, title= "Inverted Hammer", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="IH")
 
 plotshape(plotCandlesticks and plotHammer and isHammer, title= "Hammer", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="H")
 
