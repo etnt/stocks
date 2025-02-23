@@ -146,7 +146,7 @@ But wait, there is more, look at this chart:
 **Keltner Channels** use ATR to calculate the upper and lower bands, while **Bollinger
 Bands** use standard deviation.
 The **BB/KC Squeeze Indicator** combines the concepts of Bollinger Bands and Keltner
-Channels to identify periods of low volatility or “squeeze” conditions. A squeeze
+Channels to identify periods of low volatility or "squeeze" conditions. A squeeze
 is identified when the Bollinger Bands are within the Keltner Channels, indicating
 that the price may soon break out of its current range and is plotted as white marks
 at the top with a faint shadowed "curtain". Periods of high volatility
@@ -315,3 +315,21 @@ Features:
 * Configurable table position on the chart
 * Easy setup through TradingView's indicator settings
 
+### Zebra Pattern
+
+A visual aid indicator that helps distinguish different time periods with alternating background colors.
+By adding a Zebra pattern to the background based on a higher timeframe period
+we can spot when the price breaks up/down from that higher period, which can be used
+to identify entry and exit points.
+
+The script can be found [here](PineScript/zebra-pattern.pine).
+
+<img src="images/zebra-pattern.png" width=600/>
+
+Features:
+* Automatically applies alternating background patterns based on timeframe:
+  - On Daily charts: Alternates background color for even/odd weeks
+  - On 15-minute charts: Alternates background color for even/odd days
+* Uses a subtle light gray color with high transparency (90%) to avoid visual clutter
+* Simple toggle to enable/disable the pattern
+* Helps visually separate different trading periods for better pattern recognition

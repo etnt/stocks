@@ -2,7 +2,8 @@
 // © kruskakli
 //
 // By adding a Zebra pattern to the background based on a higher timeframe period
-// we can spot when the price breaks up from that higher period.
+// we can spot when the price breaks up/down from that higher period, which can be used
+// to identify entry and exit points.
 //
 //@version=6
 indicator("Zebra Week", overlay=true)
@@ -22,7 +23,7 @@ dayNumber = dayofweek(time)
 minutesSinceMidnight = hour * 60 + minute
 period15Min = minutesSinceMidnight / 15
 
-// Light gray color with 95% transparency
+// Light gray color with 90% transparency
 gee = color.new(#eeeeee, 90)
 
 // Apply zebra pattern:
