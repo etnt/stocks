@@ -234,7 +234,6 @@ if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
     table.cell(t, 2, 4, "EV/EBIT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
     table.cell(t, 3, 4, EV_EBIT_STR, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
 
-    
 
 //
 // Candlestick patterns
