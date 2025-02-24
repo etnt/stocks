@@ -28,10 +28,11 @@ gee = color.new(#eeeeee, 90)
 
 // Apply zebra pattern:
 // - Weekly pattern on Daily chart (even/odd weeks)
-// - Daily pattern on 15M chart (even/odd 15M periods)
-isEvenPeriod = isDaily ? (weekNumber % 2 == 0) : (dayNumber % 2 == 0)
+// - Daily pattern on 15M chart using continuous counting across weeks
+isEvenPeriod = isDaily ? 
+    (weekNumber % 2 == 0) : 
+    ((weekNumber * 5 + dayNumber) % 2 == 0)  // Multiply week by 5 (trading days) and add day number
 
 shouldShow = show_zebra and (isDaily or is15Min)
 
 bgcolor(title="Zebra Pattern", color=(shouldShow and isEvenPeriod) ? gee : na)
-
