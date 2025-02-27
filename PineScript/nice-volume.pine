@@ -49,9 +49,9 @@ orangered1 = color.new(#ff4500, 0)
 orangered2 = color.new(#ee4000, 0)
 orangered3 = color.new(#cd3700, 0)
 
-volLen1 = input(defval=20, title="MA length", group="Volume Lookback")
+volLen1 = input(defval=21, title="EMA length", group="Volume Lookback")
 ppLen = input(defval=10, title="Pocket Pivot length", group="Volume Lookback")
-maVol1 = ta.sma(volume, volLen1)
+maVol1 = ta.ema(volume, volLen1)
 
 closeDown = close < close[1]
 ppVol = volume >= ta.highest(volume[1], ppLen)
@@ -196,10 +196,21 @@ if barstate.islast
 
 
 //
+// A L E R T   C O N D I T I O N
+//
+// Define the crossing condition
+volumeCrossAboveEMA = volume > maVol1 and volume[1] <= maVol1[1]
+
+// Combine with greenDay and barstate.isconfirmed to ensure it's the last confirmed bar
+alertCondition = volumeCrossAboveEMA and greenDay and barstate.isconfirmed
+
+// Register the alert
+alertcondition(condition=alertCondition, title="Volume Cross Above EMA with Green Candle", message="Volume crossed above EMA with a green candle (close > open)")
+
+//
 // P L O T
 //
 plot(volume, color=vcolor, style=plot.style_columns)
 plot(maVol1, color=maVol1Color, linewidth=2)
 //plot(proxyOBV, color=color.gray, linewidth=2)
 //plot(maVol2, color=orangered3, linewidth=2)
-
