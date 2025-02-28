@@ -265,6 +265,16 @@ a moving average is displayed; positive/negative in green/red.
 *The trend*  (Positive/Negative/Weak) of the *Acc/Dist indicator*
 is displayed in either green/red.
 
+*Volume Alert Condition:* The indicator includes an alert that triggers when volume crosses above its EMA on a green candle (close > open). This is useful for identifying potential buying opportunities when volume is expanding on positive price action. To set up this alert:
+
+<img src="images/volume-alert.png" width=600/>
+
+1. Apply the Nice Volume indicator to your chart
+2. Click on the "Alerts" button in TradingView
+3. Select "Volume Cross Above EMA with Green Candle" from the alert conditions
+4. Configure your alert settings (notification method, expiration, etc.)
+5. Save the alert
+
 
 ### Comparing Sectors
 
