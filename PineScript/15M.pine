@@ -16,6 +16,17 @@ VWMA = ta.vwma(hlc3, len)
 plot(series=plotVWMA ? VWMA : na,   linewidth=1, color=color.blue,   title="VWMA",    style=plot.style_line)
 
 //
+// A L E R T   C O N D I T I O N
+//
+// Define the crossing conditions
+priceCrossAboveVWMA = close > VWMA and close[1] <= VWMA[1]
+priceCrossBelowVWMA = close < VWMA and close[1] >= VWMA[1]
+
+// Register the alerts
+alertcondition(condition=priceCrossAboveVWMA, title="Price Cross Above VWMA", message="Price crossed above VWMA")
+alertcondition(condition=priceCrossBelowVWMA, title="Price Cross Below VWMA", message="Price crossed below VWMA")
+
+//
 // Z E B R A   P A T T E R N
 //
 
