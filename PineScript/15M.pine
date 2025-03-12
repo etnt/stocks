@@ -15,6 +15,20 @@ VWMA = ta.vwma(hlc3, len)
 
 plot(series=plotVWMA ? VWMA : na,   linewidth=1, color=color.blue,   title="VWMA",    style=plot.style_line)
 
+
+// DMA5 gives the overall trend
+openHours = input(defval=6.5, title="Open: Hours a Day")
+plotD5 = input(defval=true, title="Plot DMA5", group="Intraday Moving Averages")
+dayMinutes = math.round(openHours * 60)
+intraDayLength = 5
+dminutes = intraDayLength * dayMinutes
+dlen = dminutes / timeframe.multiplier
+DMA5 = ta.sma(close, dlen)
+plotDMA5 = plotD5
+
+plot(series=plotDMA5 ? DMA5 : na,   linewidth=1, color=color.green,  title="DMA5",   style=plot.style_circles)
+
+
 //
 // A L E R T   C O N D I T I O N
 //
