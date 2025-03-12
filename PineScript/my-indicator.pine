@@ -197,7 +197,20 @@ ADRstr = str.tostring(math.round(ADR,2)) + "%"
 EPS = request.financial(syminfo.tickerid, "EARNINGS_PER_SHARE", "FY")
 EV_EBIT = request.financial(syminfo.tickerid, "EV_EBIT", "FY")
 EV_EBIT_STR = str.tostring(math.round(EV_EBIT))
+NUM_OF_SHARES = request.financial(syminfo.tickerid, "TOTAL_SHARES_OUTSTANDING", "FY")
+EV = NUM_OF_SHARES[0] * close
 
+formatLargeNumber(number) =>
+    result = ""
+    if number >= 1000000000
+        result := str.tostring(number / 1000000000, "#.##") + "B"
+    else if number >= 1000000
+        result := str.tostring(number / 1000000, "#.##") + "M"
+    else if number >= 1000
+        result := str.tostring(number / 1000, "#.##") + "K"
+    else
+        result := str.tostring(number)
+    result
 
 //
 // Construct the Table
@@ -212,11 +225,11 @@ if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
     table.cell(t, 2, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
     table.cell(t, 3, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
 
-    table.cell(t, 0, 1, syminfo.sector, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
-    table.cell(t, 1, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+    table.cell(t, 0, 1, "EV: " + formatLargeNumber(EV), text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 1, syminfo.sector, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
     table.cell(t, 2, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=text_col)
     table.cell(t, 3, 1, "", text_halign=text.align_left, text_size=text_sz, text_color=TTstrColor)
-    table.merge_cells(t, 0, 1, 3, 1)
+    table.merge_cells(t, 1, 1, 3, 1)
 
     table.cell(t, 0, 2, ix, text_halign=text.align_right, text_size=text_sz, text_color=color.green)
     table.cell(t, 1, 2, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
@@ -233,6 +246,9 @@ if barstate.islast and timeframe.period != "W" and timeframe.period != "M"
     table.cell(t, 1, 4, str.tostring(math.round(EPS[0])), text_halign=text.align_left, text_size=text_sz, text_color=value_col)
     table.cell(t, 2, 4, "EV/EBIT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
     table.cell(t, 3, 4, EV_EBIT_STR, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
+
+    
+ 
 
 
 //
@@ -276,3 +292,49 @@ plotshape(plotCandlesticks and plotInvertedHammer and isInvertedHammer, title= "
 plotshape(plotCandlesticks and plotHammer and isHammer, title= "Hammer", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="H")
 
 plotshape(plotCandlesticks and plotGravestone and isGravestone, title= "Gravestone", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="G")
+
+
+// Keltner Channels use ATR to calculate the upper and lower bands, while Bollinger Bands use standard deviation.
+//
+// The BB/KC Squeeze Indicator combines the concepts of Bollinger Bands and Keltner Channels to identify periods
+// of low volatility or “squeeze” conditions. A squeeze is identified when the Bollinger Bands are within
+// the Keltner Channels, indicating that the price may soon break out of its current range.
+//
+// Periods of high volatility on a daily chart is indicated based on the width of Bollinger Bands.
+// It plots a yellow marker at the top of the chart when volatility is high and increasing/stable,
+// and a red marker when volatility is high but decreasing. The script helps visualize when volatility
+// spikes and whether those spikes are potentially ending.
+
+//
+// Calculate the Squeeze
+//
+show_squeeze = input(defval=true,  title="Show Squeeze")
+
+bb_src = input(defval=close, title="BB source")
+length = input(defval=20,    title="BB Length")
+mult = input(defval=2.0,     title="BB MultFactor")
+kc_src = input(defval=hlc3,  title="KC source")
+lengthKC = input(defval=20,  title="KC Length")
+multKC = input(defval=1.0,   title="KC MultFactor")
+
+// Calculate BB
+[basis, upperBB, lowerBB] = ta.bb(bb_src, length, mult)
+
+// Calculate KC
+ma = ta.sma(kc_src, lengthKC)
+atr_range = ta.atr(lengthKC) * multKC
+upperKC = ma + atr_range
+lowerKC = ma - atr_range
+
+sqzOn  = (lowerBB > lowerKC) and (upperBB < upperKC)
+
+lwst = ta.lowest(close, 100) * 0.75
+
+// Calculate the dotted line representing the 'squeeze'
+float sq = sqzOn? lwst : na
+sq := sqzOn ? (na(sq[1]) ? lwst : sq[1]) : na
+
+plotshape(show_squeeze ? sq : na, title="Squeeze markings", location=location.top, color=color.white)
+
+gee = color.new(#eeeeee, 95)
+bgcolor(title="Squeeze area", color=show_squeeze and sqzOn ? gee : na)
