@@ -361,3 +361,51 @@ Features:
 * Uses a subtle light gray color with high transparency (95%) to avoid visual clutter
 * Simple toggle to enable/disable the pattern
 * Helps visually separate different trading periods for better pattern recognition
+
+## Cash Flow Analysis
+
+```mermaid
+Start: Compare Companies A & B
+  |
+  +-- FCF Margin (B > A)?
+  |    |
+  |    +-- Yes
+  |    |    |
+  |    |    +-- P/FCF (B < A)?
+  |    |    |    |
+  |    |    |    +-- Yes
+  |    |    |    |    |
+  |    |    |    |    +-- EV/EBIT (A < B)?
+  |    |    |    |    |    |
+  |    |    |    |    |    +-- Yes --> Company A: Potential Growth Value
+  |    |    |    |    |    |
+  |    |    |    |    |    +-- No --> Company B: FCF Value
+  |    |    |    |    |
+  |    |    |    +-- No --> Company A: Growth Focus, High CapEx
+  |    |    |
+  |    +-- No
+  |    |    |
+  |    |    +-- OCF Margin (A > B)?
+  |    |    |    |
+  |    |    |    +-- Yes
+  |    |    |    |    |
+  |    |    |    |    +-- EV/EBIT (A < B)?
+  |    |    |    |    |    |
+  |    |    |    |    |    +-- Yes --> Company A: Potential Value, High Growth
+  |    |    |    |    |    |
+  |    |    |    |    |    +-- No --> Company B: Stable, Leveraged
+  |    |    |    |
+  |    |    |    +-- No --> Company B: Stable FCF, Lower CapEx
+  |    |
+  +-- Check Debt-to-Equity & CapEx
+  |    |
+  +-- Debt-to-Equity (A < B) & CapEx (A > B)?
+  |    |
+  |    +-- Yes --> Company A: High Growth, Reinvestment
+  |    |
+  |    +-- No --> Company B: Stable, Higher Leverage, Efficient FCF
+  |
+  +-- Further Industry & Growth Analysis
+  |
+  +-- Investment Decision Based on Strategy
+```
