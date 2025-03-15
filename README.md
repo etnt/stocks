@@ -364,6 +364,46 @@ Features:
 
 ## Cash Flow Analysis
 
+Explanation of the Flow Chart:
+
+1. Start: Begin by comparing Companies A and B.
+
+2. FCF Margin (B > A)?:
+  * If Yes, Company B has a better free cash flow margin.
+  * If No, move to OCF margin comparison.
+
+3. P/FCF (B < A)?:
+ * If Yes, Company B's price to free cash flow is lower, indicating potential undervaluation.
+ * If No, Company A could be a growth focused company.
+
+4. OCF Margin (A > B)?:
+  * If Yes, Company A has a better operating cash flow margin.
+ * If No, Company B shows better overall cash flow.
+
+5. EV/EBIT (A < B)?:
+ * If Yes, Company A's enterprise value to EBIT is lower, indicating potential undervaluation.
+ * If No, Company B's EV/EBIT is lower.
+
+6. Debt-to-Equity (A < B) & CapEx (A > B)?
+ * This is the final check, confirming the relationships between debt and capital expenditure.
+ * If Yes, Company A is growth oriented.
+ * If No, Company B is more stable.
+
+7. Final Conclusions:
+ * Company A: High Growth, Reinvestment: Indicates heavy investment in future growth, potentially at the cost of current free cash flow.
+ * Company B: Stable, Higher Leverage, Efficient FCF: Indicates a more mature, stable company with strong free cash flow, but potentially higher financial risk due to debt.
+
+8. Further Analysis: Always conduct further industry and growth analysis before making an investment decision.
+
+9. Investment Decision: Make your investment decision based on your individual investment strategy (growth vs. stability).
+
+10. General Conclusions:
+ * If a company has a higher FCF margin and a lower P/FCF, it may represent a better value in terms of free cash flow generation.
+ * If a company has a lower EV/EBIT and a higher CapEx, it may represent a growth-oriented company with significant reinvestment.
+ * The Debt to Equity ratio, can greatly change the valuation of the EV/EBIT.
+
+This flow chart provides a structured way to analyze the metrics and arrive at general conclusions about the companies' characteristics. Remember that this is a simplified model, and further research is always necessary.
+
 ```mermaid
 flowchart TD
     Start["Compare Companies A & B"]
@@ -394,9 +434,12 @@ flowchart TD
     CompanyA4["Company A:
                High Growth, Reinvestment"]
     CompanyB4["Company B:
-               Stable, Higher Leverage, Efficient FCF"]
-    Industry["Further Industry & Growth Analysis"]
-    Decision["Investment Decision Based on Strategy"]
+               Stable, Higher Leverage,
+               Efficient FCF"]
+    Industry["Further Industry & 
+              Growth Analysis"]
+    Decision["Investment Decision
+              Based on Strategy"]
     
     Start --> FCF_Margin
     FCF_Margin -->|Yes| P_FCF
