@@ -368,21 +368,33 @@ Features:
 flowchart TD
     Start["Compare Companies A & B"]
     FCF_Margin{"FCF Margin\n(B > A)?"}
-    P_FCF{"P/FCF\n(B < A)?"}
-    EV_EBIT1{"EV/EBIT\n(A < B)?"}
-    OCF_Margin{"OCF Margin\n(A > B)?"}
-    EV_EBIT2{"EV/EBIT\n(A < B)?"}
+    P_FCF{"P/FCF
+          (B < A)?"}
+    EV_EBIT1{"EV/EBIT
+              (A < B)?"}
+    OCF_Margin{"OCF Margin
+                (A > B)?"}
+    EV_EBIT2{"EV/EBIT
+             (A < B)?"}
     Debt_CapEx{"Debt-to-Equity (A < B) &
                 CapEx (A > B)?"}
     
-    CompanyA1["Company A:\nPotential Growth Value"]
-    CompanyB1["Company B:\nFCF Value"]
-    CompanyA2["Company A:\nGrowth Focus, High CapEx"]
-    CompanyA3["Company A:\nPotential Value, High Growth"]
-    CompanyB2["Company B:\nStable, Leveraged"]
-    CompanyB3["Company B:\nStable FCF, Lower CapEx"]
-    CompanyA4["Company A:\nHigh Growth, Reinvestment"]
-    CompanyB4["Company B:\nStable, Higher Leverage, Efficient FCF"]
+    CompanyA1["Company A:
+               Potential Growth Value"]
+    CompanyB1["Company B:
+               FCF Value"]
+    CompanyA2["Company A:
+               Growth Focus, High CapEx"]
+    CompanyA3["Company A:
+               Potential Value, High Growth"]
+    CompanyB2["Company B:
+               Stable, Leveraged"]
+    CompanyB3["Company B:
+               Stable FCF, Lower CapEx"]
+    CompanyA4["Company A:
+               High Growth, Reinvestment"]
+    CompanyB4["Company B:
+               Stable, Higher Leverage, Efficient FCF"]
     Industry["Further Industry & Growth Analysis"]
     Decision["Investment Decision Based on Strategy"]
     
