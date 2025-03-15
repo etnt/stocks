@@ -365,47 +365,47 @@ Features:
 ## Cash Flow Analysis
 
 ```mermaid
-Start: Compare Companies A & B
-  |
-  +-- FCF Margin (B > A)?
-  |    |
-  |    +-- Yes
-  |    |    |
-  |    |    +-- P/FCF (B < A)?
-  |    |    |    |
-  |    |    |    +-- Yes
-  |    |    |    |    |
-  |    |    |    |    +-- EV/EBIT (A < B)?
-  |    |    |    |    |    |
-  |    |    |    |    |    +-- Yes --> Company A: Potential Growth Value
-  |    |    |    |    |    |
-  |    |    |    |    |    +-- No --> Company B: FCF Value
-  |    |    |    |    |
-  |    |    |    +-- No --> Company A: Growth Focus, High CapEx
-  |    |    |
-  |    +-- No
-  |    |    |
-  |    |    +-- OCF Margin (A > B)?
-  |    |    |    |
-  |    |    |    +-- Yes
-  |    |    |    |    |
-  |    |    |    |    +-- EV/EBIT (A < B)?
-  |    |    |    |    |    |
-  |    |    |    |    |    +-- Yes --> Company A: Potential Value, High Growth
-  |    |    |    |    |    |
-  |    |    |    |    |    +-- No --> Company B: Stable, Leveraged
-  |    |    |    |
-  |    |    |    +-- No --> Company B: Stable FCF, Lower CapEx
-  |    |
-  +-- Check Debt-to-Equity & CapEx
-  |    |
-  +-- Debt-to-Equity (A < B) & CapEx (A > B)?
-  |    |
-  |    +-- Yes --> Company A: High Growth, Reinvestment
-  |    |
-  |    +-- No --> Company B: Stable, Higher Leverage, Efficient FCF
-  |
-  +-- Further Industry & Growth Analysis
-  |
-  +-- Investment Decision Based on Strategy
+flowchart TD
+    Start["Compare Companies A & B"]
+    FCF_Margin{"FCF Margin\n(B > A)?"}
+    P_FCF{"P/FCF\n(B < A)?"}
+    EV_EBIT1{"EV/EBIT\n(A < B)?"}
+    OCF_Margin{"OCF Margin\n(A > B)?"}
+    EV_EBIT2{"EV/EBIT\n(A < B)?"}
+    Debt_CapEx{"Debt-to-Equity (A < B) &\nCapEx (A > B)?"}
+    
+    CompanyA1["Company A:\nPotential Growth Value"]
+    CompanyB1["Company B:\nFCF Value"]
+    CompanyA2["Company A:\nGrowth Focus, High CapEx"]
+    CompanyA3["Company A:\nPotential Value, High Growth"]
+    CompanyB2["Company B:\nStable, Leveraged"]
+    CompanyB3["Company B:\nStable FCF, Lower CapEx"]
+    CompanyA4["Company A:\nHigh Growth, Reinvestment"]
+    CompanyB4["Company B:\nStable, Higher Leverage, Efficient FCF"]
+    Industry["Further Industry & Growth Analysis"]
+    Decision["Investment Decision Based on Strategy"]
+    
+    Start --> FCF_Margin
+    FCF_Margin -->|Yes| P_FCF
+    FCF_Margin -->|No| OCF_Margin
+    
+    P_FCF -->|Yes| EV_EBIT1
+    P_FCF -->|No| CompanyA2
+    
+    EV_EBIT1 -->|Yes| CompanyA1
+    EV_EBIT1 -->|No| CompanyB1
+    
+    OCF_Margin -->|Yes| EV_EBIT2
+    OCF_Margin -->|No| CompanyB3
+    
+    EV_EBIT2 -->|Yes| CompanyA3
+    EV_EBIT2 -->|No| CompanyB2
+    
+    Start --> Debt_CapEx
+    
+    Debt_CapEx -->|Yes| CompanyA4
+    Debt_CapEx -->|No| CompanyB4
+    
+    Start --> Industry
+    Industry --> Decision
 ```
