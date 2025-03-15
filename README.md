@@ -372,7 +372,8 @@ flowchart TD
     EV_EBIT1{"EV/EBIT\n(A < B)?"}
     OCF_Margin{"OCF Margin\n(A > B)?"}
     EV_EBIT2{"EV/EBIT\n(A < B)?"}
-    Debt_CapEx{"Debt-to-Equity (A < B) &\nCapEx (A > B)?"}
+    Debt_CapEx{"Debt-to-Equity (A < B) &
+                CapEx (A > B)?"}
     
     CompanyA1["Company A:\nPotential Growth Value"]
     CompanyB1["Company B:\nFCF Value"]
