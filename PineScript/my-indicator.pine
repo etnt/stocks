@@ -281,7 +281,6 @@ isHammer=((open[1]>close) and (low<low[1]) and ((high - low)>3*(open -close)) an
 
 isGravestone=(close<math.min(open[1],close[1]) and ((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.9) and ((high - open)/(.001 + high - low) > 0.9))
 
-// Plotting
 plotshape(plotCandlesticks and plotEveningStar and isEveningStar, title = "Evening Star", color = color.red, style = shape.arrowdown, text = "Evening\nStar", textcolor = color.red, size = size.normal, location = location.abovebar)
 
 plotshape(plotCandlesticks and plotMorningStar and isMorningStar, title = "Morning Star", color = color.lime, style = shape.arrowup, text = "Morning\nStar", textcolor = color.lime, size = size.normal, location = location.belowbar)
@@ -292,6 +291,13 @@ plotshape(plotCandlesticks and plotInvertedHammer and isInvertedHammer, title= "
 plotshape(plotCandlesticks and plotHammer and isHammer, title= "Hammer", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="H")
 
 plotshape(plotCandlesticks and plotGravestone and isGravestone, title= "Gravestone", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="G")
+
+
+// Show 52-week high (to be used with Minervinis VCP setup)
+weeklyLookback = input.int(defval=52, title="Weekly Lookback", minval=1, maxval=52, group="Highest High Marker")
+WeeklyClose = request.security(syminfo.tickerid, 'W', close)
+W52high = ta.highest(WeeklyClose, weeklyLookback)
+plot(WeeklyClose >= W52high and barstate.islast ? high * 1.05 : na, color=color.yellow, style=plot.style_circles, linewidth=2)
 
 
 // Keltner Channels use ATR to calculate the upper and lower bands, while Bollinger Bands use standard deviation.
