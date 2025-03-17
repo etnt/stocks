@@ -281,6 +281,14 @@ isHammer=((open[1]>close) and (low<low[1]) and ((high - low)>3*(open -close)) an
 
 isGravestone=(close<math.min(open[1],close[1]) and ((high - low)>3*(open -close)) and  ((high - close)/(.001 + high - low) > 0.9) and ((high - open)/(.001 + high - low) > 0.9))
 
+
+// Show 52-week high (to be used with Minervinis VCP setup)
+weeklyLookback = input.int(defval=52, title="Weekly Lookback", minval=1, maxval=52, group="Highest High Marker")
+WeeklyClose = request.security(syminfo.tickerid, 'W', close)
+W52high = ta.highest(WeeklyClose, weeklyLookback)
+plot(WeeklyClose >= W52high and barstate.islast ? high * 1.05 : na, color=color.yellow, style=plot.style_circles, linewidth=2)
+
+// Plotting
 plotshape(plotCandlesticks and plotEveningStar and isEveningStar, title = "Evening Star", color = color.red, style = shape.arrowdown, text = "Evening\nStar", textcolor = color.red, size = size.normal, location = location.abovebar)
 
 plotshape(plotCandlesticks and plotMorningStar and isMorningStar, title = "Morning Star", color = color.lime, style = shape.arrowup, text = "Morning\nStar", textcolor = color.lime, size = size.normal, location = location.belowbar)
@@ -293,54 +301,49 @@ plotshape(plotCandlesticks and plotHammer and isHammer, title= "Hammer", locatio
 plotshape(plotCandlesticks and plotGravestone and isGravestone, title= "Gravestone", location=location.belowbar, color=color.lime, style=shape.arrowup, textcolor = color.lime, size = size.normal, text="G")
 
 
-// Show 52-week high (to be used with Minervinis VCP setup)
-weeklyLookback = input.int(defval=52, title="Weekly Lookback", minval=1, maxval=52, group="Highest High Marker")
-WeeklyClose = request.security(syminfo.tickerid, 'W', close)
-W52high = ta.highest(WeeklyClose, weeklyLookback)
-plot(WeeklyClose >= W52high and barstate.islast ? high * 1.05 : na, color=color.yellow, style=plot.style_circles, linewidth=2)
-
-
-// Keltner Channels use ATR to calculate the upper and lower bands, while Bollinger Bands use standard deviation.
 //
-// The BB/KC Squeeze Indicator combines the concepts of Bollinger Bands and Keltner Channels to identify periods
-// of low volatility or “squeeze” conditions. A squeeze is identified when the Bollinger Bands are within
-// the Keltner Channels, indicating that the price may soon break out of its current range.
+// Inside bars
 //
-// Periods of high volatility on a daily chart is indicated based on the width of Bollinger Bands.
-// It plots a yellow marker at the top of the chart when volatility is high and increasing/stable,
-// and a red marker when volatility is high but decreasing. The script helps visualize when volatility
-// spikes and whether those spikes are potentially ending.
+show_inside_bar = input(defval=true,  title="Show Inside Bar")
+float inside = 0.0
+if show_inside_bar
+    if (high <= high[1]) and (low >= low[1])
+        inside := 1
+    else if inside[1] == 1
+        int i = 2
+        while true
+            if inside[i] == 1
+                i := i + 1
+                continue
+            else if (high <= high[i]) and (low >= low[i])
+                inside := 1
+                break
+            else
+                inside := 0
+                break
+    else
+        inside := 0
 
-//
-// Calculate the Squeeze
-//
-show_squeeze = input(defval=true,  title="Show Squeeze")
+vh = ta.valuewhen(inside[1] == 0 and inside == 1, high[1], 0)
+vl = ta.valuewhen(inside[1] == 0 and inside == 1, low[1],  0)
 
-bb_src = input(defval=close, title="BB source")
-length = input(defval=20,    title="BB Length")
-mult = input(defval=2.0,     title="BB MultFactor")
-kc_src = input(defval=hlc3,  title="KC source")
-lengthKC = input(defval=20,  title="KC Length")
-multKC = input(defval=1.0,   title="KC MultFactor")
+color_line = input.color(defval=color.yellow, title="Inside Bars Color")
+transp = input.int(defval=90, title="Color transparency", minval=0, maxval=100)
+line_width = input.int(defval=1, title="Line width", minval=1, maxval=4)
+color_fill = color.new(color_line, transp)
 
-// Calculate BB
-[basis, upperBB, lowerBB] = ta.bb(bb_src, length, mult)
+ph = plot(inside == 1 ? vh : na, title="Inside Bars High", style=plot.style_linebr, linewidth=line_width, color=color_line)
+pl = plot(inside == 1 ? vl : na, title="Inside Bars Low", style=plot.style_linebr, linewidth=line_width, color=color_line)
+fill(ph, pl, color=color_fill)
 
-// Calculate KC
-ma = ta.sma(kc_src, lengthKC)
-atr_range = ta.atr(lengthKC) * multKC
-upperKC = ma + atr_range
-lowerKC = ma - atr_range
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// 3 Inside Up -   Bullish Reversal - Must form near the Support
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+color_yellow = color.yellow
+barcolor(open[2] > close[2] ? close[1] > open[1] ? close[1] <= open[2] ? close[2] <= open[1] ? ((close[1] - open[1]) < (open[2] - close[2])) ? close > open ? close > close[1] ? open > open[1] ? close > open[2] ? color_yellow :na :na : na : na : na:na : na : na : na)
 
-sqzOn  = (lowerBB > lowerKC) and (upperBB < upperKC)
-
-lwst = ta.lowest(close, 100) * 0.75
-
-// Calculate the dotted line representing the 'squeeze'
-float sq = sqzOn? lwst : na
-sq := sqzOn ? (na(sq[1]) ? lwst : sq[1]) : na
-
-plotshape(show_squeeze ? sq : na, title="Squeeze markings", location=location.top, color=color.white)
-
-gee = color.new(#eeeeee, 95)
-bgcolor(title="Squeeze area", color=show_squeeze and sqzOn ? gee : na)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// 3 Inside Down -   Bearish Reversal - Must form near the Resistance
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+color_black = color.white
+barcolor(open[2] < close[2] ? close[1] < open[1] ? close[1] >= open[2] ? close[2] >= open[1] ? ((open[1] - close[1]) < (close[2] - open[2])) ? close < open ? close < close[1] ? open < open[1] ? close < open[2] ? color_black :na :na : na : na : na:na : na : na : na)
