@@ -313,12 +313,15 @@ The script can be found [here](PineScript/my-indicator.pine).
 Features:
 * Key Moving Averages displayed based on timeframe (Daily, Weekly, Intraday)
 * Average Period Range Table showing:
-  - Index and its change
-  - Trend Template status
-  - Average Period Range percentage
+  - Enterprise Value (EV)
   - Stock's sector
-  - Enterprise value to EBIT ratio
-  - Earnings per share
+  - Index and its change
+  - Average Daily Range percentage (ADR%)
+  - Trend Template status (TT)
+  - Earnings Per Share (EPS)
+  - Enterprise Value to EBIT ratio (EV/EBIT)
+  - RSI(14) value with color coding
+  - MACD percentage with color coding
 * Popular Candlestick Patterns including:
   - Evening Star
   - Morning Star
@@ -326,6 +329,9 @@ Features:
   - Hammer
   - Inverted Hammer
   - Gravestone
+* Inside Bars indicator highlighting when price action is contained within a previous bar's range
+* 52-week high marker for identifying new highs
+* 3 Inside Up and 3 Inside Down pattern detection with bar coloring
 * Minervini's Trend Template implementation showing when a stock is in a strong trend
 
 ### Portfolio Tracker
