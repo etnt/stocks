@@ -212,14 +212,35 @@ formatLargeNumber(number) =>
         result := str.tostring(number)
     result
 
+// Calculate RSI
+rsi_length = 14
+rsi_value = math.round(ta.rsi(src, rsi_length))
+
+// MACD calculation
+fast_length = 12
+slow_length = 26
+signal_length = 9
+macd_line = ta.ema(src, fast_length) - ta.ema(src, slow_length)
+signal_line = ta.ema(macd_line, signal_length)
+macd_diff = macd_line - signal_line
+
+// Calculate MACD percentage difference
+macd_pct = signal_line != 0 ? (macd_diff / math.abs(signal_line)) * 100 : 0
+macd_pct_rounded = math.round(macd_pct, 2)
+
+// Determine color based on conditions
+rsi_color = (rsi_value > 70) ? color.red : (rsi_value < 30) ? color.green : value_col
+// Color based on MACD line position relative to zero line
+macd_color = (macd_line > 0) ? color.green : (macd_line < 0) ? color.red : value_col
+
 //
-// Construct the Table
+// Construct the Info Table
 //
 plotInfoTable = input(defval=true, title="Plot Info Table")
 tabLoc = input.string(title="Table Location", defval="Upper Right", options=["Upper Right","Middle Right","Lower Right"])
 tabPos = (tabLoc == "Upper Right") ? position.top_right : (tabLoc == "Middle Right") ? position.middle_right : position.bottom_right
 
-table t = table.new(tabPos, 4, 5)
+table t = table.new(tabPos, 4, 6)
 if plotInfoTable and barstate.islast and timeframe.period != "W" and timeframe.period != "M"
     table.cell(t, 0, 0, "", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
     table.cell(t, 1, 0, "", text_halign=text.align_left, text_size=text_sz, text_color=value_col)
@@ -248,6 +269,10 @@ if plotInfoTable and barstate.islast and timeframe.period != "W" and timeframe.p
     table.cell(t, 2, 4, "EV/EBIT:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
     table.cell(t, 3, 4, EV_EBIT_STR, text_halign=text.align_left, text_size=text_sz, text_color=value_col)
 
+    table.cell(t, 0, 5, "RSI(14):", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 1, 5, str.tostring(rsi_value), text_halign=text.align_left, text_size=text_sz, text_color=rsi_color)
+    table.cell(t, 2, 5, "MACD%:", text_halign=text.align_right, text_size=text_sz, text_color=text_col)
+    table.cell(t, 3, 5, str.tostring(macd_pct_rounded) + "%", text_halign=text.align_left, text_size=text_sz, text_color=macd_color)
 
 
 //
